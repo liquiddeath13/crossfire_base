@@ -202,6 +202,8 @@
     <ClInclude Include="LTransform.h" />
     <ClInclude Include="LTRotation.h" />
     <ClInclude Include="LTVector.h" />
+    <ClInclude Include="NoAccessProtection.h" />
+    <ClInclude Include="OverlayGfx.h" />
     <ClInclude Include="OwnInternals.h" />
     <ClInclude Include="Patterns.h" />
     <ClInclude Include="PlayersMgr.h" />

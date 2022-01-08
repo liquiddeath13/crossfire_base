@@ -5,25 +5,40 @@
 #include <d3dx9.h>
 #include <vector>
 #include <unordered_map>
+#include <ShlObj.h>
+#include <ctime>
+#include <chrono>
 #include "XorStr.h"
 #include "OwnInternals.h"
 #include "CallsObfuscate.h"
 #include "DbgConsole.h"
-#include "Utils.h"
 #include "Types.h"
+#include "Utils.h"
 #include "Patterns.h"
 #include "Constants.h"
 #include "PlayersMgr.h"
 #include "detoursx64/detours.h"
 #include "Hook/hook.h"
 #include "D3D.h"
+//#include "OverlayGfx.h"
+//#include "NoAccessProtection.h"
 
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "detoursx64/detours.lib")
 
+
 void MainThread() {
     while (!IsGameReadyForHook()) {
         sleep(100);
+    }
+    if (DebugConsole->IsAttached()) {
+        DebugConsole->PrintMsg(xc("Initializing addresses..."));
+    }
+    InitAddresses();
+    if (addresses[xc("pLTClientShell")]) {
+        if (DebugConsole->IsAttached()) {
+            DebugConsole->PrintMsg(xc("Success!"));
+        }
     }
     if (DebugConsole->IsAttached()) {
         DebugConsole->PrintMsg(xc("Initializing MH..."));
@@ -37,15 +52,6 @@ void MainThread() {
         DebugConsole->PrintMsg(xc("Initializing DX hooks..."));
     }
     if (InitDXHooks()) {
-        if (DebugConsole->IsAttached()) {
-            DebugConsole->PrintMsg(xc("Success!"));
-        }
-    }
-    if (DebugConsole->IsAttached()) {
-        DebugConsole->PrintMsg(xc("Initializing addresses..."));
-    }
-    InitAddresses();
-    if (addresses[xc("pLTClientShell")]) {
         if (DebugConsole->IsAttached()) {
             DebugConsole->PrintMsg(xc("Success!"));
         }
@@ -69,12 +75,13 @@ void Unhook() {
     }
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
     dtlc(hModule);
     if (!gmha(xc("crossfire.exe"))) return TRUE;
     RemovePeHeader(hModule);
     UnlinkModuleFromPEB(hModule);
+    //InitializeNoAccessProtection(hModule);
     if (!DebugConsole->IsAttached()) {
         DebugConsole->Attach();
     }

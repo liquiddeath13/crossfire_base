@@ -28,7 +28,6 @@ HMODULE WINAPI GetModuleBaseAddress(LPCWSTR moduleName)
 
 	return NULL;
 }
-
 FARPROC WINAPI GetExportAddress(HMODULE hMod, const char* lpProcName)
 {
 	char* pBaseAddress = (char*)hMod;
@@ -116,6 +115,7 @@ HMODULE hUser32 = GetModuleBaseAddress(xw(L"USER32.DLL"));
 #define gmfn(moduleName, fname, sz) reinterpret_cast<decltype(&GetModuleFileNameA)>(GetExportAddress(hKernel32, xc("GetModuleFileNameA")))(moduleName, fname, sz)
 #define gcp reinterpret_cast<decltype(&GetCurrentProcess)>(GetExportAddress(hKernel32, xc("GetCurrentProcess")))()
 #define vp(la, dwsz, fnp, lpfp) reinterpret_cast<decltype(&VirtualProtect)>(GetExportAddress(hKernel32, xc("VirtualProtect")))(la, dwsz, fnp, lpfp)
+#define va(x, y, z, w) reinterpret_cast<decltype(&VirtualAlloc)>(GetExportAddress(hKernel32, xc("VirtualAlloc")))(x, y, z, w)
 #define mevt(dwf, dx, dy, dwd, dwei) reinterpret_cast<decltype(&mouse_event)>(GetExportAddress(hUser32, xc("mouse_event")))(dwf, dx, dy, dwd, dwei)
 #define gaks(vk) reinterpret_cast<decltype(&GetAsyncKeyState)>(GetExportAddress(hUser32, xc("GetAsyncKeyState")))(vk)
 #define fwa(x, y) reinterpret_cast<decltype(&FindWindowA)>(GetExportAddress(hUser32, xc("FindWindowA")))(x, y)

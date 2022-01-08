@@ -175,48 +175,6 @@ int StartHidden(LPTHREAD_START_ROUTINE ThreadRoutine) {
 	return TRUE;
 }
 
-DWORD64* GetD3DVtable(HWND hWnd)
-{
-	typedef LPDIRECT3D9(__stdcall* D3DCreate)(UINT);
-	HMODULE hDLL = GetModuleBaseAddress(xw(L"d3d9.dll"));
-	if (hDLL == nullptr) {
-		if (DebugConsole->IsAttached()) {
-			DebugConsole->PrintMsg(xc("!hD3D9dll"));
-		}
-		return nullptr; 
-	}
-	D3DCreate pDirect3DCreate9 = (D3DCreate)GetExportAddress(hDLL, xc("Direct3DCreate9"));
-
-	LPDIRECT3D9 pD3D = pDirect3DCreate9(D3D_SDK_VERSION);
-	D3DDISPLAYMODE d3ddm;
-	HRESULT hRes = pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
-	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory(&d3dpp, sizeof(d3dpp));
-	d3dpp.Windowed = true;
-	d3dpp.SwapEffect = D3DSWAPEFFECT_FLIP;
-	d3dpp.hDeviceWindow = hWnd;
-	d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;
-	d3dpp.BackBufferCount = 1;
-	IDirect3DDevice9* ppReturnedDeviceInterface = nullptr;
-
-	hRes = pD3D->CreateDevice(
-		D3DADAPTER_DEFAULT,
-		D3DDEVTYPE_HAL,
-		d3dpp.hDeviceWindow,
-		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-		&d3dpp, &ppReturnedDeviceInterface
-	);
-
-	DWORD64* d3dVtable = NULL;
-
-	if (ppReturnedDeviceInterface != nullptr) {
-		d3dVtable = (DWORD64*)(*((DWORD64*)ppReturnedDeviceInterface));
-	}
-
-	pD3D->Release();
-	return d3dVtable;
-}
-
 bool IsGameReadyForHook() {
 	return GetModuleBaseAddress(xw(L"CShell_x64.dll")) && GetModuleBaseAddress(xw(L"ClientFx_x64.fxd"));
 }
@@ -233,6 +191,12 @@ T* GetPtrValueMany(PBYTE ptr, DWORD offset, size_t length)
 	T* val = new T[length]();
 	memcpy_s(val, length, ptr + offset, length);
 	return val;
+}
+
+size_t GetBoneRadius(D3DXVECTOR3 start, D3DXVECTOR3 end) {
+	D3DXVECTOR3 Box = end - start;
+	if (Box.y < 0) Box.y *= -1;
+	return (int)Box.y * 1.5;
 }
 
 bool WorldToScreen(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3* InOut)

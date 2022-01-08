@@ -12,7 +12,6 @@ struct IntersectInfo
 	unsigned long unk2;
 	unsigned long unk3;
 };
-
 class IntersectQuery {
 public:
 	IntersectQuery() {
@@ -33,6 +32,12 @@ public:
 	void* m_pActualIntersectUserData;
 };
 
+enum class GradientOrientation
+{
+	Horizontal,
+	Vertical
+};
+
 typedef HRESULT(__stdcall* PresentFn)(IDirect3DDevice9*, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 typedef HRESULT(__stdcall* ResetFn)(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*);
 typedef HRESULT(__stdcall* tReset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
@@ -42,5 +47,6 @@ typedef HRESULT(__stdcall* tEndScene)(LPDIRECT3DDEVICE9);
 typedef unsigned int LTRESULT;
 typedef void* LTObject;
 typedef __int64(__fastcall* tIntersectSegment)(const IntersectQuery& iQuery, IntersectInfo* pInfo);
-typedef signed __int64(__fastcall* SetObjectDims)(void*, void*, LTVector<float>*, unsigned __int32);
+typedef signed __int64(__fastcall* tSetObjectDims)(void*, void*, LTVector<float>*, unsigned __int32);
 typedef char(__fastcall* tGetNodeTransform)(void*, void*, __int64, LTransform*, bool);
+typedef __int64(__fastcall* tDoScreenshot)(__int64 a);
