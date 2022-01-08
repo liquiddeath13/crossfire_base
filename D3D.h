@@ -418,17 +418,31 @@ bool InitDXHooks() {
 	return false;
 }
 
-void DeinitDXHooks() {
+bool DeinitDXHooks() {
 	auto d3dVtable = GetD3DVtable(fwa(NULL, xc("CROSSFIRE")));
 	if (d3dVtable) {
 		if (MH_DisableHook((DWORD_PTR*)d3dVtable[_present]) != MH_OK) {
-			//std::cout << "failed to disable present hook" << std::endl;
+			if (DebugConsole->IsAttached()) {
+				DebugConsole->PrintMsg(xc("failed to disable present hook"));
+			}
+			return false;
 		}
 		if (MH_DisableHook((DWORD_PTR*)d3dVtable[_reset]) != MH_OK) {
-			//std::cout << "failed to disable reset hook" << std::endl;
+			if (DebugConsole->IsAttached()) {
+				DebugConsole->PrintMsg(xc("failed to disable reset hook"));
+			}
+			return false;
 		}
 		if (MH_DisableHook((DWORD_PTR*)d3dVtable[_endScene]) != MH_OK) {
-			//std::cout << "failed to disable reset hook" << std::endl;
+			if (DebugConsole->IsAttached()) {
+				DebugConsole->PrintMsg(xc("failed to disable reset hook"));
+			}
+			return false;
 		}
+		return true;
 	}
+	if (DebugConsole->IsAttached()) {
+		DebugConsole->PrintMsg(xc("failed to get d3dvt"));
+	}
+	return false;
 }
