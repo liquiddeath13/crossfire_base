@@ -178,10 +178,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Hook\MinHook\src\buffer.c" />
+    <ClCompile Include="Hook\MinHook\src\HDE\hde32.c" />
+    <ClCompile Include="Hook\MinHook\src\HDE\hde64.c" />
+    <ClCompile Include="Hook\MinHook\src\hook.c" />
+    <ClCompile Include="Hook\MinHook\src\trampoline.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallsObfuscate.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="D3D.h" />
+    <ClInclude Include="Hook\hook.h" />
+    <ClInclude Include="Hook\MinHook\include\MinHook.h" />
+    <ClInclude Include="Hook\MinHook\src\buffer.h" />
+    <ClInclude Include="Hook\MinHook\src\HDE\hde32.h" />
+    <ClInclude Include="Hook\MinHook\src\HDE\hde64.h" />
+    <ClInclude Include="Hook\MinHook\src\HDE\pstdint.h" />
+    <ClInclude Include="Hook\MinHook\src\HDE\table32.h" />
+    <ClInclude Include="Hook\MinHook\src\HDE\table64.h" />
+    <ClInclude Include="Hook\MinHook\src\trampoline.h" />
+    <ClInclude Include="LTransform.h" />
+    <ClInclude Include="LTRotation.h" />
+    <ClInclude Include="LTVector.h" />
     <ClInclude Include="OwnInternals.h" />
+    <ClInclude Include="Patterns.h" />
+    <ClInclude Include="Types.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="XorStr.h" />
   </ItemGroup>

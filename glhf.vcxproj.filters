@@ -13,10 +13,28 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ExternalDeps">
+      <UniqueIdentifier>{2c418032-7e0e-4a63-b39c-81bf581c82f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook\MinHook\src\buffer.c">
+      <Filter>ExternalDeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook\MinHook\src\hook.c">
+      <Filter>ExternalDeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook\MinHook\src\trampoline.c">
+      <Filter>ExternalDeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook\MinHook\src\HDE\hde32.c">
+      <Filter>ExternalDeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook\MinHook\src\HDE\hde64.c">
+      <Filter>ExternalDeps</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +49,54 @@
     </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="LTVector.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="LTransform.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="LTRotation.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Patterns.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\hook.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\include\MinHook.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\buffer.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\trampoline.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\HDE\hde32.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\HDE\hde64.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\HDE\pstdint.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\HDE\table32.h">
+      <Filter>ExternalDeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Hook\MinHook\src\HDE\table64.h">
+      <Filter>ExternalDeps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

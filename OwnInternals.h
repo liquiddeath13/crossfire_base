@@ -78,3 +78,15 @@ typedef struct _UNLINKED_MODULE
 	(x).Blink->Flink = (real);	\
 	(real)->Blink = (x).Blink;	\
 	(real)->Flink = (x).Flink;
+
+struct FindModuleHandle
+{
+	HMODULE m_hModule;
+	FindModuleHandle(HMODULE hModule) : m_hModule(hModule)
+	{
+	}
+	bool operator() (UNLINKED_MODULE const& Module) const
+	{
+		return (Module.hModule == m_hModule);
+	}
+};
