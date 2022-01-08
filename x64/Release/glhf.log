@@ -1,0 +1,21 @@
+﻿  dllmain.cpp
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(21,81): warning C4267: аргумент: преобразование из "size_t" в "INT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(30,84): warning C4267: аргумент: преобразование из "size_t" в "INT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(105,20): warning C4244: return: преобразование "double" в "size_t", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(275,17): warning C4244: инициализация: преобразование "double" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(276,57): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(281,44): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(281,30): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(281,18): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(342,51): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(342,38): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+  buffer.c
+  hde32.c
+  hde64.c
+  hook.c
+  trampoline.c
+  Создание кода
+  Previous IPDB not found, fall back to full compilation.
+  All 974 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  glhf.vcxproj -> C:\Windows\System32\d3dref9.dll

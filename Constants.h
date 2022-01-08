@@ -1,4 +1,5 @@
 #pragma once
+#include "Colors.h"
 
 const DWORD64 _endScene = 42;
 const DWORD64 _drawIndexedPrimitive = 82;

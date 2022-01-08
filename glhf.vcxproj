@@ -186,8 +186,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallsObfuscate.h" />
+    <ClInclude Include="Colors.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="D3D.h" />
+    <ClInclude Include="DbgConsole.h" />
     <ClInclude Include="Hook\hook.h" />
     <ClInclude Include="Hook\MinHook\include\MinHook.h" />
     <ClInclude Include="Hook\MinHook\src\buffer.h" />
@@ -202,6 +204,7 @@
     <ClInclude Include="LTVector.h" />
     <ClInclude Include="OwnInternals.h" />
     <ClInclude Include="Patterns.h" />
+    <ClInclude Include="PlayersMgr.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="XorStr.h" />

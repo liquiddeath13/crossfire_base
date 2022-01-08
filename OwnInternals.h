@@ -69,6 +69,16 @@ typedef struct _UNLINKED_MODULE
 	PLDR_MODULE Entry; // =PLDR_DATA_TABLE_ENTRY
 } UNLINKED_MODULE;
 
+typedef struct _OBJECT_ATTRIBUTES {
+	ULONG Length;
+	HANDLE RootDirectory;
+	PUNICODE_STRING ObjectName;
+	ULONG Attributes;
+	PVOID SecurityDescriptor;
+	PVOID SecurityQualityOfService;
+} OBJECT_ATTRIBUTES;
+typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
+
 #define UNLINK(x)					\
 	(x).Flink->Blink = (x).Blink;	\
 	(x).Blink->Flink = (x).Flink;

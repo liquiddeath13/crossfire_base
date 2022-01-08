@@ -98,5 +98,14 @@
     <ClInclude Include="Hook\MinHook\src\HDE\table64.h">
       <Filter>ExternalDeps</Filter>
     </ClInclude>
+    <ClInclude Include="PlayersMgr.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="DbgConsole.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Colors.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
