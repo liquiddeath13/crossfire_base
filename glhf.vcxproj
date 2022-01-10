@@ -186,7 +186,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aimbot.h" />
-    <ClInclude Include="CacheSystem.h" />
     <ClInclude Include="CallsObfuscate.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="Constants.h" />
@@ -212,8 +211,10 @@
     <ClInclude Include="Patterns.h" />
     <ClInclude Include="PlayersMgr.h" />
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="Sig.hpp" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="WeaponMgr.h" />
     <ClInclude Include="XorStr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

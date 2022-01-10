@@ -53,6 +53,23 @@ struct FOV
 	bool Inited() {
 		return ScreenCenter.x != 0 && ScreenCenter.y != 0;
 	}
+	void RescaleByDistance(float actual_distance, float max_delta_distance, float min_delta_distance, float factor) {
+		if (actual_distance > max_delta_distance) {
+			size_t timesLower = round(actual_distance / max_delta_distance);
+			if (timesLower > 0) {
+				auto decrease = factor * timesLower;
+				Distance *= decrease > 1 ? 0 : (1 - decrease);
+			}
+		}
+		if (actual_distance < min_delta_distance) {
+			factor *= 1.4;
+			size_t timesBigger = round(min_delta_distance / actual_distance);
+			if (timesBigger > 0) {
+				auto increase = factor * timesBigger;
+				Distance *= (1 + increase);
+			}
+		}
+	}
 };
 
 struct AimSearchResult {
@@ -61,6 +78,7 @@ struct AimSearchResult {
 	D3DXVECTOR3 BonePos;
 	UINT FramesCount;
 	UINT FramesCountNeeded;
+	float DistanceThroughMap;
 };
 
 enum class AimSearchType {

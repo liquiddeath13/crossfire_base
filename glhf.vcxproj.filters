@@ -122,10 +122,13 @@
     <ClInclude Include="GameInfo.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="CacheSystem.h">
+    <ClInclude Include="Core.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Core.h">
+    <ClInclude Include="Sig.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="WeaponMgr.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

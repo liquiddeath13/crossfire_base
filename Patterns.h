@@ -2,8 +2,7 @@
 
 struct Pattern {
 	std::string Module;
-	PBYTE Sequence;
-	const char* Mask;
+	const char* Sequence;
 	int64_t Offset;
 };
 
@@ -11,32 +10,35 @@ std::unordered_map<std::string, Pattern> patterns{
 	{
 		xc("IntersectSegment"), Pattern{
 			xc("crossfire.exe"),
-			(PBYTE)"\x48\x89\x54\x24\x00\x48\x89\x4C\x24\x00\x48\x83\xEC\x28\x48\x8B\x05\x00\x00\x00\x00\x48\x8B\x00\x4C\x8B\x44\x24\x00\x48\x8B\x54\x24\x00\x48\x8B\x0D\x00\x00\x00\x00\xFF\x50\x18\x48\x83\xC4\x28\xC3",
-			"xxxx?xxxx?xxxxxxx????xxxxxxx?xxxx?xxx????xxxxxxxx",
+			"48 89 54 24 ? 48 89 4C 24 ? 48 83 EC 28 48 8B 05",
 			0x0
 		}
 	},
 	{
 		xc("GetNodeTransform"), Pattern{
 			xc("crossfire.exe"),
-			(PBYTE)"\x48\x8B\x44\x24\x00\x48\x89\x44\x24\x00\x44\x0F\xB6\x4C\x24\x00\x4C\x8B\x44\x24\x00\x8B\x54\x24\x50\x48\x8B\x4C\x24\x00\xE8",
-			"xxxx?xxxx?xxxxx?xxxx?xxxxxxxx?x",
+			"48 8B 44 24 ? 48 89 44 24 ? 44 0F B6 4C 24 ? 4C 8B 44 24 ? 8B",
 			-0x6C
 		}
 	},
 	{
 		xc("SetObjectDims"), Pattern{
 			xc("crossfire.exe"),
-			(PBYTE)"\x44\x89\x4C\x24\x00\x4C\x89\x44\x24\x00\x48\x89\x54\x24\x00\x48\x89\x4C\x24\x00\x48\x81\xEC\x00\x00\x00\x00\x48\x8D\x4C\x24\x00\xE8\x00\x00\x00\x00\x48\x83\xBC\x24\x00\x00\x00\x00\x00\x74\x0B\x48\x83\xBC\x24\x00\x00\x00\x00\x00\x75\x3E\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x83\x3D\x00\x00\x00\x00\x00\x7C\x21",
-			"xxxx?xxxx?xxxx?xxxx?xxx????xxxx?x????xxxx?????xxxxxx?????xxx????x????xx?????xx",
+			"44 89 4C 24 ? 4C 89 44 24 ? 48 89 54 24 ? 48 89 4C 24 ? 48 81 EC ? ? ? ? 48 8D",
 			0x0
 		}
 	},
 	{
 		xc("DoScreenshot"), Pattern{
 			xc("CShell_x64.dll"),
-			(PBYTE)"\x40\x53\x48\x81\xEC\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x00\x00\x48\x33\xC4\x48\x89\x84\x24\x00\x00\x00\x00\x66\xC7\x41\x00\x00\x00\x33\xC9\xFF\x15",
-			"xxxxx????xxx????xxxxxxx????xxx???xxxx",
+			"40 53 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 66 C7 41",
+			0x0
+		}
+	},
+	{
+		xc("Detour28_3"), Pattern{
+			xc("CShell_x64.dll"),
+			"E8 ? ? ? ? 4C 8B C8 48 85 C0 0F 84 ? ? ? ? F3 0F 10 88 ? ? ? ? F3 0F 10 80",
 			0x0
 		}
 	}
@@ -46,7 +48,8 @@ std::unordered_map<std::string, DWORD64> addresses;
 
 void InitAddresses() {
 	for (const auto& p : patterns) {
-		addresses[p.first] = findAddress(p.second.Module.c_str(), p.second.Sequence, p.second.Mask) + p.second.Offset;
+		auto modInfo = GetModuleInfo(p.second.Module.c_str());
+		addresses[p.first] = (DWORD64)Sig::find(modInfo.first, modInfo.second, p.second.Sequence) + p.second.Offset;
 		if (DebugConsole->IsAttached()) {
 			DebugConsole->PrintMsg(p.first + ": " + NumberToHex(addresses[p.first]));
 		}

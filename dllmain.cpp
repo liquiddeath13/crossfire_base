@@ -14,13 +14,14 @@
 #include "CallsObfuscate.h"
 #include "DbgConsole.h"
 #include "Types.h"
-#include "GameInfo.h"
 #include "Settings.h"
+#include "Sig.hpp"
 #include "Utils.h"
 #include "Patterns.h"
 #include "Constants.h"
 #include "PlayersMgr.h"
-#include "CacheSystem.h"
+#include "WeaponMgr.h"
+#include "GameInfo.h"
 #include "Aimbot.h"
 #include "detoursx64/detours.h"
 #include "Hook/hook.h"
@@ -55,7 +56,6 @@ void MainThread() {
             DebugConsole->PrintMsg(xc("Successfully inited!"));
         }
     }
-    Cache = new CacheSystem();
     aim->SetSmooth(Settings->GetFloat(xc("AimSmooth")));
     if (DebugConsole->IsAttached()) {
         DebugConsole->PrintMsg(xc("Initializing DX hooks..."));

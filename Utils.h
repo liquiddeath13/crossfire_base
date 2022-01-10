@@ -41,10 +41,15 @@ BYTE* FindPattern(BYTE* dwAddress, DWORD64 dwSize, PBYTE pbSig, const char* szMa
     return 0;
 }
 
-DWORD64 findAddress(LPCSTR moduleName, PBYTE Pattern, LPCSTR Mask) {
-    HMODULE base = gmha(moduleName);
-    DWORD64 moduleSize = GetModuleSize(base);
-    return moduleSize > 0 ? (DWORD64)FindPattern((PBYTE)base, (DWORD64)base + moduleSize, Pattern, Mask) : 0;
+//DWORD64 findAddress(LPCSTR moduleName, PBYTE Pattern, LPCSTR Mask) {
+//    HMODULE base = gmha(moduleName);
+//    DWORD64 moduleSize = GetModuleSize(base);
+//    return moduleSize > 0 ? (DWORD64)FindPattern((PBYTE)base, (DWORD64)base + moduleSize, Pattern, Mask) : 0;
+//}
+
+std::pair<LPVOID, DWORD64> GetModuleInfo(LPCSTR moduleName) {
+	HMODULE base = gmha(moduleName);
+	return std::make_pair((LPVOID)base, GetModuleSize(base));
 }
 
 std::vector<UNLINKED_MODULE> UnlinkedModules;
@@ -193,6 +198,20 @@ T* GetPtrValueMany(PBYTE ptr, DWORD offset, size_t length)
 	return val;
 }
 
+std::string ReadStr(PBYTE ptr, DWORD offset) {
+	std::string r;
+	while (ptr != (PBYTE)"\x00") {
+		r += *ptr;
+		ptr++;
+	}
+	return r;
+}
+
+void SetPtrValueMany(PBYTE ptr, DWORD offset, PBYTE src, size_t length) {
+	memcpy_s(ptr + offset, length, src, length);
+	memcpy_s(ptr + offset + length + 1, 1, "\x00", 1);
+}
+
 size_t GetBoneRadius(D3DXVECTOR3 start, D3DXVECTOR3 end) {
 	D3DXVECTOR3 Box = end - start;
 	if (Box.y < 0) Box.y *= -1;
@@ -259,14 +278,4 @@ bool IsPointInFOV(POINT pt, FOV f)
 bool IsBoneInFOV(D3DXVECTOR3 bonePos, FOV f)
 {
 	return IsPointInFOV({ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, f);
-}
-
-LONG GetAimbotCircleRadius()
-{
-	return (LONG)(Settings->GetInt(xc("AimbotRadius")));
-}
-
-LONG GetTriggerBotCircleRadius()
-{
-	return (LONG)(Settings->GetInt(xc("TriggerBotRadius")));
 }

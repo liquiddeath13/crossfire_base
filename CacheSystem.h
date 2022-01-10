@@ -52,59 +52,66 @@ public:
 				if (player != nullptr && player->IsValid()) {
 					
 					player->Local = player->ClientID == LocalPlayer->ClientID;
-					player->TeammateToLocal = !player->IsOpponentTo(LocalPlayer->TeamIndex);
 
 					if (player->Local) {
 						Myself = player;
-						Myself->VisibleBy = Myself->IsVisibleByOpponents(Opponents, LocalPlayer, 16, pDev).first;
+						if (Myself->IsAlive()) {
+							Myself->VisibleBy = Myself->IsVisibleByOpponents(Opponents, LocalPlayer, 16, pDev).first;
+						}
 						continue;
 					}
 
+					player->TeammateToLocal = !player->IsOpponentTo(LocalPlayer->TeamIndex);
+					player->DistanceToLocal = GetDistance(LocalPlayer->GetBoneTransform(6).m_Pos, player->GetBoneTransform(6).m_Pos);
+
 					if (!player->TeammateToLocal && player->IsAlive() && player->ExistOnScreen(pDev)) {
+
 						auto qv = player->IsVisibleByOpponents(player->Local ? Opponents : Teammates, LocalPlayer, 16, pDev);
 						player->VisibleBy = qv.first;
 						player->VisibleBoneID = qv.second;
-						player->VisibleByLocalPlayer = player->VisibleBy == VISIBLE_BY::Local;
-						if (
-							(Settings->GetBool(xc("Aimbot")) || Settings->GetBool(xc("TriggerBot"))) 
-							&& GI->AimFOV.Inited() 
-							&& player->VisibleBoneID != -1 
-							&& player->VisibleBy == VISIBLE_BY::Local
-						) 
-						{
-							auto boneIdx = player->BoneVisibleInFOV(pDev, LocalPlayer, -1, true, GI->AimFOV);
-							if (boneIdx != -1) {
-								auto bonePos = player->GetBoneTransform2D(boneIdx, pDev);
-								bool should = false;
-								auto distance = GetDistance(LocalPlayer->GetBoneTransform(6).m_Pos, player->GetBoneTransform(6).m_Pos);
-								auto aimDistance = GetDistance({ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, GI->AimFOV.ScreenCenter);
-								switch (SearchType) {
-								case AimSearchType::ByLowestHealth:
-									if (player->Health < closestPos) {
-										closestPos = player->Health;
-										should = true;
+
+						if (player->DistanceToLocal < Settings->GetFloat(xc("AimMaxDistance"))) {
+							if (
+								(Settings->GetBool(xc("Aimbot")) || Settings->GetBool(xc("TriggerBot")))
+								&& GI->AimFOV.Inited()
+								&& player->VisibleBoneID != -1
+								&& player->VisibleBy == VISIBLE_BY::Local
+								)
+							{
+								if (player->BoneInFOV(pDev, player->VisibleBoneID, GI->AimFOV)) {
+									auto bonePos = player->GetBoneTransform2D(player->VisibleBoneID, pDev);
+									bool should = false;
+									auto aimDistance = GetDistance({ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, GI->AimFOV.ScreenCenter);
+									switch (SearchType) {
+									case AimSearchType::ByLowestHealth:
+										if (player->Health < closestPos) {
+											closestPos = player->Health;
+											should = true;
+										}
+										break;
+									case AimSearchType::ClosestByDistance:
+										if (player->DistanceToLocal < closestPos) {
+											closestPos = player->DistanceToLocal;
+											should = true;
+										}
+										break;
+									case AimSearchType::ClosestToCrosshair:
+										if (aimDistance <= GI->AimFOV.Distance && aimDistance < closestPos)
+										{
+											closestPos = aimDistance;
+											should = true;
+										}
+										break;
 									}
-									break;
-								case AimSearchType::ClosestByDistance:
-									if (distance < closestPos) {
-										closestPos = distance;
-										should = true;
+									if (should) {
+										TargetSearchResult.PlayerIndex = i;
+										TargetSearchResult.BonePos = bonePos;
+										TargetSearchResult.DistanceThroughMap = player->DistanceToLocal;
 									}
-									break;
-								case AimSearchType::ClosestToCrosshair:
-									if (aimDistance <= GI->AimFOV.Distance && aimDistance < closestPos)
-									{
-										closestPos = aimDistance;
-										should = true;
-									}
-									break;
-								}
-								if (should) {
-									TargetSearchResult.PlayerIndex = i;
-									TargetSearchResult.BonePos = bonePos;
 								}
 							}
 						}
+
 					}
 
 					if (player->TeammateToLocal) {

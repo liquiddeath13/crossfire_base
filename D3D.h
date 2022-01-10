@@ -378,17 +378,15 @@ public:
 	void DrawBone(Player* player, UINT iStart, UINT iEnd, D3DCOLOR Color)
 	{
 		if (hideDrawings) return;
-		auto StartPos = player->GetBoneTransform2D(iStart, pDev);
-		auto EndPos = player->GetBoneTransform2D(iEnd, pDev);
+		auto StartPos = player->GetBoneTransform(iStart).m_Pos.ToDX();
+		auto EndPos = player->GetBoneTransform(iEnd).m_Pos.ToDX();
 
-		if (StartPos.x != 0 && EndPos.x != 0) {
+		if (WorldToScreen(pDev, &StartPos) && WorldToScreen(pDev, &EndPos)) {
 			if (Settings->GetBool(xc("SkeletonsWithBoneNumbers"))) {
 				DrawTxt(StartPos.x, StartPos.y, std::to_string(iStart).c_str(), Color);
 				DrawTxt(EndPos.x, EndPos.y, std::to_string(iEnd).c_str(), Color);
 			}
-			if (Settings->GetBool(xc("SkeletonsWithBoneLines"))) {
-				DrawLine(StartPos.x, StartPos.y, EndPos.x, EndPos.y, Color);
-			}
+			DrawLine(StartPos.x, StartPos.y, EndPos.x, EndPos.y, Color);
 			/*if (Settings->GetBool(xc("SkeletonsWithRadiusCircles"))) {
 				int BoneRadius = GetBoneRadius(StartPos, EndPos);
 				DrawCircle(StartPos.x, StartPos.y - BoneRadius, BoneRadius, Color);
@@ -416,13 +414,14 @@ public:
 
 		if (dot) FillRGB(cx, cy, 1, 1, Color); //Dot point
 	}
-	void DrawSkeleton(Player* player, Player* me, D3DCOLOR Color) {
+	void DrawSkeleton(Player* player, Player* local, D3DCOLOR Color) {
 		if (hideDrawings) {
 			return;
 		}
-		auto tHead = player->GetBoneTransform2D(6, pDev);
-		auto tNeck = player->GetBoneTransform2D(6, pDev);
-		if (tHead.x == 0 && tNeck == 0) {
+		auto tHead = player->GetBoneTransform(6).m_Pos.ToDX();
+		auto tNeck = player->GetBoneTransform(5).m_Pos.ToDX();
+
+		if (!WorldToScreen(pDev, &tHead) || !WorldToScreen(pDev, &tNeck)) {
 			return;
 		}
 		int HeadRadius = GetBoneRadius(tNeck, tHead);
@@ -433,7 +432,7 @@ public:
 			DrawTxt(nameX, nameY + 15, player->Nickname, Color);
 		}
 		if (Settings->GetBool(xc("SkeletonsWithDistance"))) {
-			DrawTxt(nameX, nameY + 15 * 2, std::to_string(GetDistance(me->GetBoneTransform(6).m_Pos, player->GetBoneTransform(6).m_Pos)).c_str(), Color);
+			DrawTxt(nameX, nameY + 15 * 2, std::to_string(player->DistanceTo(local)).c_str(), Color);
 		}
 		if (Settings->GetBool(xc("SkeletonsWithHealth"))) {
 			DrawTxt(nameX, nameY + 15 * 4, std::to_string(player->Health).c_str(), Color);
@@ -444,39 +443,39 @@ public:
 
 		if (Settings->GetBool(xc("SkeletonsWithBoneLines"))) {
 			DrawCircle(tHead.x, tHead.y - HeadRadius, HeadRadius, Color);
+			DrawBone(player, 6, 0, Color);
+			DrawBone(player, 5, 6, Color);
+			DrawBone(player, 4, 5, Color);
+			DrawBone(player, 3, 4, Color);
+			DrawBone(player, 2, 3, Color);
+			DrawBone(player, 1, 2, Color);
+
+			DrawBone(player, 21, 1, Color);
+			DrawBone(player, 22, 21, Color);
+			DrawBone(player, 23, 22, Color);
+			DrawBone(player, 24, 23, Color);
+
+			DrawBone(player, 25, 1, Color);
+			DrawBone(player, 26, 25, Color);
+			DrawBone(player, 27, 26, Color);
+			DrawBone(player, 28, 27, Color);
+
+			DrawBone(player, 14, 5, Color);
+			DrawBone(player, 15, 14, Color);
+			DrawBone(player, 16, 15, Color);
+			DrawBone(player, 17, 16, Color);
+			DrawBone(player, 18, 17, Color);
+			DrawBone(player, 19, 17, Color);
+			DrawBone(player, 20, 17, Color);
+
+			DrawBone(player, 7, 5, Color);
+			DrawBone(player, 8, 7, Color);
+			DrawBone(player, 9, 8, Color);
+			DrawBone(player, 10, 9, Color);
+			DrawBone(player, 11, 10, Color);
+			DrawBone(player, 12, 10, Color);
+			DrawBone(player, 13, 10, Color);
 		}
-		DrawBone(player, 6, 0, Color);
-		DrawBone(player, 5, 6, Color);
-		DrawBone(player, 4, 5, Color);
-		DrawBone(player, 3, 4, Color);
-		DrawBone(player, 2, 3, Color);
-		DrawBone(player, 1, 2, Color);
-
-		DrawBone(player, 21, 1, Color);
-		DrawBone(player, 22, 21, Color);
-		DrawBone(player, 23, 22, Color);
-		DrawBone(player, 24, 23, Color);
-
-		DrawBone(player, 25, 1, Color);
-		DrawBone(player, 26, 25, Color);
-		DrawBone(player, 27, 26, Color);
-		DrawBone(player, 28, 27, Color);
-
-		DrawBone(player, 14, 5, Color);
-		DrawBone(player, 15, 14, Color);
-		DrawBone(player, 16, 15, Color);
-		DrawBone(player, 17, 16, Color);
-		DrawBone(player, 18, 17, Color);
-		DrawBone(player, 19, 17, Color);
-		DrawBone(player, 20, 17, Color);
-
-		DrawBone(player, 7, 5, Color);
-		DrawBone(player, 8, 7, Color);
-		DrawBone(player, 9, 8, Color);
-		DrawBone(player, 10, 9, Color);
-		DrawBone(player, 11, 10, Color);
-		DrawBone(player, 12, 10, Color);
-		DrawBone(player, 13, 10, Color);
 	}
 	void DrawHealthBar(Player* Player, int x, int y)
 	{
