@@ -48,8 +48,8 @@ public:
 						if (IsBoneInFOV(bonePos, TriggerBotFOV)) {
 
 							if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
-								mevt(MOUSEEVENTF_LEFTDOWN, 0, 5, 0, 0);
-								mevt(MOUSEEVENTF_LEFTUP, 0, 5, 0, 0);
+								mevt(MOUSEEVENTF_LEFTDOWN, 0, 6, 0, 0);
+								mevt(MOUSEEVENTF_LEFTUP, 0, 6, 0, 0);
 							}
 
 						}
