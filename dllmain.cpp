@@ -56,14 +56,7 @@ void MainThread() {
         }
     }
     Cache = new CacheSystem();
-    /*if (DebugConsole->IsAttached()) {
-        DebugConsole->PrintMsg(xc("Attaching caching routine..."));
-    }
-    if (StartHidden((LPTHREAD_START_ROUTINE)UpdateCacheRoutine, xw(L"mrac_x64.dll"), 0x2664) != FALSE) {
-        if (DebugConsole->IsAttached()) {
-            DebugConsole->PrintMsg(xc("Successfully started!"));
-        }
-    }*/
+    aim->SetSmooth(Settings->GetFloat(xc("AimSmooth")));
     if (DebugConsole->IsAttached()) {
         DebugConsole->PrintMsg(xc("Initializing DX hooks..."));
     }

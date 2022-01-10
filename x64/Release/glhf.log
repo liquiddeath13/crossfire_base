@@ -1,0 +1,42 @@
+﻿  dllmain.cpp
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Utils.h(199,20): warning C4244: return: преобразование "double" в "size_t", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(80,1): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(185,1): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\CacheSystem.h(46,40): warning C4838: Преобразование из "int" в "UINT" требует сужающего преобразования.
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\CacheSystem.h(51,1): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\CacheSystem.h(97,1): warning C4267: =: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(216,1): warning C4267: аргумент: преобразование из "size_t" в "INT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(386,33): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(386,21): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(387,29): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(387,19): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(428,1): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(430,1): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(446,46): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(446,32): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(446,20): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(529,46): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(529,33): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(31,90): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(32,108): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(108,38): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(108,28): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(130,64): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(130,1): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.30.30705\include\utility(247,55): warning C4267: инициализация: преобразование из "size_t" в "_Ty2"; возможна потеря данных
+          with
+          [
+              _Ty2=UINT
+          ]
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(86): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::pair<bool,UINT>::pair<bool,unsigned __int64,0>(std::pair<bool,unsigned __int64> &&) noexcept"
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(86): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::pair<bool,UINT>::pair<bool,unsigned __int64,0>(std::pair<bool,unsigned __int64> &&) noexcept"
+  buffer.c
+  hde32.c
+  hde64.c
+  hook.c
+  trampoline.c
+  Создание кода
+  Previous IPDB not found, fall back to full compilation.
+  All 1938 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  glhf.vcxproj -> C:\Windows\System32\d3dref9.dll

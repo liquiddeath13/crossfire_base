@@ -52,20 +52,20 @@ public:
 				if (player != nullptr && player->IsValid()) {
 					
 					player->Local = player->ClientID == LocalPlayer->ClientID;
+					player->TeammateToLocal = !player->IsOpponentTo(LocalPlayer->TeamIndex);
 
 					if (player->Local) {
 						Myself = player;
+						Myself->VisibleBy = Myself->IsVisibleByOpponents(Opponents, LocalPlayer, 16, pDev).first;
+						continue;
 					}
 
-					player->TeammateToLocal = !player->IsOpponentTo(LocalPlayer->TeamIndex);
-
-					if ((!player->TeammateToLocal || player->Local) && player->IsAlive() && player->ExistOnScreen(pDev)) {
+					if (!player->TeammateToLocal && player->IsAlive() && player->ExistOnScreen(pDev)) {
 						auto qv = player->IsVisibleByOpponents(player->Local ? Opponents : Teammates, LocalPlayer, 16, pDev);
 						player->VisibleBy = qv.first;
 						player->VisibleBoneID = qv.second;
 						player->VisibleByLocalPlayer = player->VisibleBy == VISIBLE_BY::Local;
-						if (!player->Local && Settings->GetBool(xc("Aimbot")) && GI->AimFOV.Inited() && player->VisibleBoneID != -1 && player->VisibleBy == VISIBLE_BY::Local) {
-							//auto boneTransform = player->GetBoneTransform(boneIndex);
+						if (Settings->GetBool(xc("Aimbot")) && GI->AimFOV.Inited() && player->VisibleBoneID != -1 && player->VisibleBy == VISIBLE_BY::Local) {
 							auto boneIdx = player->BoneVisibleInFOV(pDev, LocalPlayer, -1, true, GI->AimFOV);
 							if (boneIdx != -1) {
 								auto bonePos = player->GetBoneTransform2D(boneIdx, pDev);
@@ -95,7 +95,6 @@ public:
 								}
 								if (should) {
 									TargetSearchResult.PlayerIndex = i;
-									//TargetSearchResult.BoneTransform = boneTransform;
 									TargetSearchResult.BonePos = bonePos;
 								}
 							}

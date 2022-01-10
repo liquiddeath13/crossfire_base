@@ -33,11 +33,11 @@ void InitSettings() {
 	Settings->SetBool(xc("PreventFpsDrop"), false);
 	Settings->SetInt(xc("DisableGhostESPAtPlayersCount"), 12);
 	Settings->SetBool(xc("UseDebugConsole"), true);
-	Settings->SetBool(xc("Skeletons"), false);
+	Settings->SetBool(xc("Skeletons"), true);
 	Settings->SetBool(xc("2DBoxes"), false);
 	Settings->SetBool(xc("LinesFromCenterToHead"), true);
-	Settings->SetBool(xc("SkeletonsWithNicknames"), false);
-	Settings->SetBool(xc("SkeletonsWithBoneLines"), false);
+	Settings->SetBool(xc("SkeletonsWithNicknames"), true);
+	Settings->SetBool(xc("SkeletonsWithBoneLines"), true);
 	Settings->SetBool(xc("SkeletonsWithDistance"), false);
 	Settings->SetBool(xc("SkeletonsWithKills"), false);
 	Settings->SetBool(xc("SkeletonsWithHealth"), false);
@@ -47,6 +47,7 @@ void InitSettings() {
 	Settings->SetBool(xc("DrawRadius"), true);
 	Settings->SetBool(xc("Aimbot"), true);
 	Settings->SetBool(xc("AutoAim"), false);
+	Settings->SetFloat(xc("AimSmooth"), 4.f);
 	Settings->SetInt(xc("AimSearchType"), (int)AimSearchType::ClosestByDistance);
 	Settings->SetInt(xc("AimKey"), VK_RBUTTON);
 	Settings->SetBool(xc("TriggerBot"), true);
