@@ -31,55 +31,12 @@ C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.30.307
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(86): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::pair<bool,UINT>::pair<bool,unsigned __int64,0>(std::pair<bool,unsigned __int64> &&) noexcept"
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(86): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::pair<bool,UINT>::pair<bool,unsigned __int64,0>(std::pair<bool,unsigned __int64> &&) noexcept"
   buffer.c
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(7,5): error C2065: PEB: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(7,12): error C2065: pPeb: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(7,18): warning C4047: =: "int" отличается по уровням косвенного обращения от "void *"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(7,18): error C2106: =: левый операнд должен быть левосторонним значением
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(9,22): error C2065: LDR_DATA_TABLE_ENTRY: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(9,43): error C2065: pLdrDataTableEntry: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(9,49): warning C4047: =: "int" отличается по уровням косвенного обращения от "void *"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(9,49): error C2106: =: левый операнд должен быть левосторонним значением
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(11,7): error C2065: pPeb: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(11,14): error C2065: PPEB: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(11,15): error C2146: синтаксическая ошибка: отсутствие ";" перед идентификатором "__readgsqword"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(13,11): error C2065: pPeb: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(13,18): warning C4047: ==: "int" отличается по уровням косвенного обращения от "void *"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(16,21): error C2065: pLdrDataTableEntry: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(16,45): error C2065: PLDR_DATA_TABLE_ENTRY: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(16,46): error C2146: синтаксическая ошибка: отсутствие ";" перед идентификатором "pPeb"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(16,50): error C2065: pPeb: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(16,52): error C2223: выражение слева от "->Ldr" должно указывать на структуру или объединение
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(17,19): error C2065: pPeb: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(17,21): error C2223: выражение слева от "->Ldr" должно указывать на структуру или объединение
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(21,35): error C2065: pLdrDataTableEntry: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(21,37): error C2223: выражение слева от "->FullDllName" должно указывать на структуру или объединение
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(21,16): error C2198: lstrcmpiW: слишком мало аргументов для вызова
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(22,38): error C2065: pLdrDataTableEntry: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(22,40): error C2223: выражение слева от "->Reserved2" должно указывать на структуру или объединение
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(22,4): warning C4033: "GetModuleBaseAddress" должен возвращать значение
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(25,22): error C2065: pLdrDataTableEntry: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(25,46): error C2065: PLDR_DATA_TABLE_ENTRY: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(25,47): error C2064: результатом вычисления фрагмента не является функция, принимающая 347 аргументов
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(27,29): error C2065: pPeb: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(27,31): error C2223: выражение слева от "->Ldr" должно указывать на структуру или объединение
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(89,74): warning C4013: xw: нет определения; предполагается "extern" с возвратом типа "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(89,91): warning C4047: функция: "LPCWSTR" отличается по уровням косвенного обращения от "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(89,74): warning C4024: GetModuleBaseAddress: различные типы для формального и фактического параметров 1
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(89,96): warning C4013: xc: нет определения; предполагается "extern" с возвратом типа "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(89,112): warning C4047: функция: "const char *" отличается по уровням косвенного обращения от "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(89,96): warning C4024: GetExportAddress: различные типы для формального и фактического параметров 2
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(106,61): warning C4047: функция: "LPCWSTR" отличается по уровням косвенного обращения от "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(106,44): warning C4024: GetModuleBaseAddress: различные типы для формального и фактического параметров 1
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(106,62): error C2099: инициализатор не является константой
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(107,57): warning C4047: функция: "LPCWSTR" отличается по уровням косвенного обращения от "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(107,42): warning C4024: GetModuleBaseAddress: различные типы для формального и фактического параметров 1
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\CallsObfuscate.h(107,58): error C2099: инициализатор не является константой
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Hook\MinHook\src\buffer.c(83,9): error C2065: reinterpret_cast: необъявленный идентификатор
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Hook\MinHook\src\buffer.c(83,9): warning C4013: decltype: нет определения; предполагается "extern" с возвратом типа "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Hook\MinHook\src\buffer.c(83,9): warning C4047: функция: "const char *" отличается по уровням косвенного обращения от "int"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Hook\MinHook\src\buffer.c(83,9): warning C4024: GetExportAddress: различные типы для формального и фактического параметров 2
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Hook\MinHook\src\buffer.c(83,9): warning C4552: ">": результат выражения не используется
   hde32.c
   hde64.c
   hook.c
   trampoline.c
+  Создание кода
+  Previous IPDB not found, fall back to full compilation.
+  All 1961 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  glhf.vcxproj -> C:\Windows\System32\d3dref9.dll
