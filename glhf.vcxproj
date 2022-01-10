@@ -185,11 +185,15 @@
     <ClCompile Include="Hook\MinHook\src\trampoline.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Aimbot.h" />
+    <ClInclude Include="CacheSystem.h" />
     <ClInclude Include="CallsObfuscate.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="Core.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="DbgConsole.h" />
+    <ClInclude Include="GameInfo.h" />
     <ClInclude Include="Hook\hook.h" />
     <ClInclude Include="Hook\MinHook\include\MinHook.h" />
     <ClInclude Include="Hook\MinHook\src\buffer.h" />
@@ -207,6 +211,7 @@
     <ClInclude Include="OwnInternals.h" />
     <ClInclude Include="Patterns.h" />
     <ClInclude Include="PlayersMgr.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="XorStr.h" />

@@ -132,7 +132,7 @@ NtCreateThreadEx_t fnNtCreateThreadEx = NULL;
 NtQueryInformationThread_t fnNtQueryInformationThread = NULL;
 NtSetInformationThread_t fnNtSetInformationThread = NULL;
 
-int StartHidden(LPTHREAD_START_ROUTINE ThreadRoutine) {
+int StartHidden(LPTHREAD_START_ROUTINE ThreadRoutine, LPCWSTR legalModuleName, DWORD64 legalModuleOffset = 0) {
 	DWORD dwThreadId = 0;
 	DWORD_PTR dwStartAddress = 0;
 	ULONG lHideThread = 1, lRet = 0;
@@ -144,7 +144,7 @@ int StartHidden(LPTHREAD_START_ROUTINE ThreadRoutine) {
 		if (DebugConsole->IsAttached()) {
 			DebugConsole->PrintMsg(xc("!hNtDLL"));
 		}
-		return -1;
+		return FALSE;
 	}
 
 	fnNtQueryInformationThread = (NtQueryInformationThread_t)GetExportAddress(hNtDLL, xc("NtQueryInformationThread"));
@@ -155,9 +155,9 @@ int StartHidden(LPTHREAD_START_ROUTINE ThreadRoutine) {
 		if (DebugConsole->IsAttached()) {
 			DebugConsole->PrintMsg(xc("!fnNtQueryInformationThread || !fnNtSetInformationThread || !fnNtCreateThreadEx"));
 		}
-		return -1;
+		return FALSE;
 	}
-	auto aStart = GetModuleBaseAddress(xw(L"mrac_x64.dll")) + 0x1337;
+	auto aStart = GetModuleBaseAddress(legalModuleName) + legalModuleOffset;
 	fnNtCreateThreadEx(&hThread, THREAD_ALL_ACCESS, 0, gcp, (LPTHREAD_START_ROUTINE)aStart /* Start address */, 0, 0x1 /* Suspended */, 0, 0, 0, 0);
 	//hThread = ct(NULL, 0, ThreadRoutine, NULL, 0, &dwThreadId);
 	ctx.ContextFlags = CONTEXT_ALL;
@@ -236,4 +236,37 @@ POINT GetScreenCenter(IDirect3DDevice9* pDev)
 	D3DVIEWPORT9 viewport;
 	pDev->GetViewport(&viewport);
 	return{ static_cast<LONG>(viewport.Width / 2), static_cast<LONG>(viewport.Height / 2) };
+}
+
+float GetDistance(LTVector<float> pt1, LTVector<float> pt2)
+{
+	return static_cast<float>(sqrt((pt2.y - pt1.y) * (pt2.y - pt1.y) + (pt2.x - pt1.x) * (pt2.x - pt1.x) + (pt2.z - pt1.z) * (pt2.z - pt1.z)));
+}
+
+float GetDistance(POINT pt1, POINT pt2)
+{
+	return static_cast<float>(sqrt((pt2.y - pt1.y) * (pt2.y - pt1.y) + (pt2.x - pt1.x) * (pt2.x - pt1.x)));
+}
+
+//should do distance based aimbot, not fov
+
+bool IsPointInFOV(POINT pt, FOV f)
+{
+	return pt.x >= f.ScreenCenter.x - f.Distance && pt.x <= f.ScreenCenter.x + f.Distance &&
+		pt.y >= f.ScreenCenter.y - f.Distance && pt.y <= f.ScreenCenter.y + f.Distance;
+}
+
+bool IsBoneInFOV(D3DXVECTOR3 bonePos, FOV f)
+{
+	return IsPointInFOV({ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, f);
+}
+
+LONG GetAimbotCircleRadius()
+{
+	return (LONG)(Settings->GetInt(xc("AimbotRadius")));
+}
+
+LONG GetTriggerBotCircleRadius()
+{
+	return (LONG)(Settings->GetInt(xc("TriggerBotRadius")));
 }

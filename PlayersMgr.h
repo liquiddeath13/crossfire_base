@@ -2,23 +2,11 @@
 
 enum class VISIBLE_BY {
 	None,
-	Me,
+	Local,
 	Teammate,
 	Opponent
 };
 
-/*
-object в 0x0 занимает 8 байт
-clientid в 0x8 занимает 1 байт
-teamindex в 0x9 занимает 1 байт
-nickname в 0xA занимает 14 байт
-hasc4 в 0x28 занимает 1 байт
-health в 0x44 занимает 4 байта
-kills в 0x48 занимает 4 байта
-deaths в 0x4C занимает 4 байта
-headshots в 0x50 занимает 4 байта
-ping в 0x54 занимает 4 байта
-*/
 struct Player {
 	void* Object;
 	char ClientID;
@@ -31,8 +19,11 @@ struct Player {
 	int32_t Kills;
 	int32_t Deaths;
 	int32_t Headshots;
-	int32_t Ping;
-	int32_t Team;
+	bool VisibleByLocalPlayer;
+	bool Local;
+	bool TeammateToLocal;
+	VISIBLE_BY VisibleBy;
+	UINT VisibleBoneID;
 
 	bool operator==(Player* rval) {
 		return rval->ClientID == ClientID;
@@ -43,16 +34,34 @@ struct Player {
 	D3DXVECTOR3 GetPos3D() {
 		return GetPtrValue<D3DXVECTOR3>((PBYTE)Object, 0x15C);
 	}
+	LTVector<float> GetPosLT() {
+		auto v = GetPos3D();
+		return {v.x, v.y, v.z};
+	}
 	bool IsOpponentTo(char teamIndex) {
 		return TeamIndex != teamIndex;
 	}
 	bool IsValid() {
-		return Object != NULL && Health > 0;
+		return Object != NULL;
+	}
+	bool IsAlive() {
+		return Health > 0;
+	}
+	bool ExistOnScreen(LPDIRECT3DDEVICE9 pDev) {
+		return GetBoneTransform2D(6, pDev).x != 0;
 	}
 	LTransform GetBoneTransform(UINT Bone) {
 		LTransform Trans;
 		if (addresses[xc("GetNodeTransform")]) ((tGetNodeTransform)addresses[xc("GetNodeTransform")])(0, Object, Bone, &Trans, true);
 		return Trans;
+	}
+	D3DXVECTOR3 GetBoneTransform2D(UINT Bone, LPDIRECT3DDEVICE9 pDev) {
+		auto bone3d = GetBoneTransform(Bone).m_Pos.ToDX();
+		if (WorldToScreen(pDev, &bone3d)) {
+			bone3d.y -= 2.f;
+			return bone3d;
+		}
+		return { 0,0,0 };
 	}
 	void GetNodeTransform(UINT Bone, LTransform& Out) {
 		LTransform Trans;
@@ -65,54 +74,89 @@ struct Player {
 		GetNodeTransform(bone, r);
 		return r;
 	}
-	bool IsVisibleBy(Player* rval, size_t targetBone = -1) {
-		auto FromPos3D = GetBoneTransform(6).m_Pos;
+	std::pair<bool, UINT> IsVisibleBy(Player* rval, size_t targetBone = -1) {
+		auto FromPos3D = GetBoneTransform(5).m_Pos;
 		if (targetBone != -1) {
 			auto ToPos3D = rval->GetBoneTransform(targetBone).m_Pos;
 			IntersectQuery pQuery;
 			IntersectInfo pInfo;
 			pQuery.m_From = D3DXVECTOR3{ FromPos3D.x, FromPos3D.y, FromPos3D.z };
 			pQuery.m_To = D3DXVECTOR3{ ToPos3D.x, ToPos3D.y, ToPos3D.z };
-			return !((tIntersectSegment)addresses[xc("IntersectSegment")])(pQuery, &pInfo);
+			auto qv = !((tIntersectSegment)addresses[xc("IntersectSegment")])(pQuery, &pInfo);
+			return std::make_pair(qv, qv ? targetBone : -1);
 		}
 		for (size_t i = 1; i < 30; i++)
 		{
-			auto ToPos3D = rval->GetBoneTransform(i).m_Pos;
-			IntersectQuery pQuery;
-			IntersectInfo pInfo;
-			pQuery.m_From = D3DXVECTOR3{ FromPos3D.x, FromPos3D.y, FromPos3D.z };
-			pQuery.m_To = D3DXVECTOR3{ ToPos3D.x, ToPos3D.y, ToPos3D.z };
-			if (!((tIntersectSegment)addresses[xc("IntersectSegment")])(pQuery, &pInfo)) {
-				return true;
+			auto qv = IsVisibleBy(rval, i);
+			if (qv.first) {
+				return std::make_pair(true, i);
 			}
 		}
-		return false;
+		return std::make_pair(false, -1);
 	}
-	VISIBLE_BY IsVisibleByOpponents(Player** players, Player* local, size_t len) {
+	std::pair<VISIBLE_BY, UINT> IsVisibleByOpponents(std::pair<std::vector<Player*>, size_t> players, Player* local, size_t len, LPDIRECT3DDEVICE9 pDev) {
 		if (ClientID != local->ClientID) {
-			if (IsVisibleBy(local)) {
-				return VISIBLE_BY::Me;
+			auto q = IsVisibleBy(local);
+			if (q.first) {
+				return std::make_pair(VISIBLE_BY::Local, q.second);
 			}
 		}
-		if (len > 12) {
-			//prevent massive fps drop
-			return VISIBLE_BY::None;
+		if (players.second < 2 || !Settings->GetBool(xc("GhostESP"))) {
+			return std::make_pair(VISIBLE_BY::None, -1);
+		}
+		if (Settings->GetBool(xc("PreventFpsDrop"))) {
+			if (players.second > Settings->GetInt(xc("DisableGhostESPAtPlayersCount"))) {
+				return std::make_pair(VISIBLE_BY::None, -1);
+			}
 		}
 		for (size_t i = 0; i < len; i++)
 		{
-			auto player = players[i];
-			if (player != nullptr && player->IsValid() && player->ClientID != local->ClientID && player->IsOpponentTo(TeamIndex)) {
-				if (IsVisibleBy(player)) {
-					return ClientID == local->ClientID ? VISIBLE_BY::Opponent : VISIBLE_BY::Teammate;
+			auto player = players.first[i];
+			if (
+				player != nullptr 
+				&& player->IsValid()
+				&& player->ExistOnScreen(pDev)
+				&& player->ClientID != local->ClientID
+				&& player->IsOpponentTo(TeamIndex)
+				&& !player->IsOpponentTo(local->TeamIndex)
+			) {
+				auto q = IsVisibleBy(player);
+				if (q.first) {
+					return ClientID == local->ClientID ? std::make_pair(VISIBLE_BY::Opponent, q.second) : std::make_pair(VISIBLE_BY::Teammate, q.second);
 				}
 			}
 		}
-		return VISIBLE_BY::None;
+		return std::make_pair(VISIBLE_BY::None, -1);
+	}
+	bool BoneInFOV(LPDIRECT3DDEVICE9 pDev, UINT targetBone, FOV f) {
+		return IsBoneInFOV(GetBoneTransform2D(targetBone, pDev), f);
+	}
+	UINT BoneVisibleInFOV(LPDIRECT3DDEVICE9 pDev, Player* From, UINT targetBone, bool withPriorityList, FOV f) {
+		if (targetBone != -1) {
+			bool boneVisible = IsVisibleBy(From, targetBone).first && BoneInFOV(pDev, targetBone, f) ? targetBone : -1;
+		}
+		if (withPriorityList) {
+			for (auto mainBonesID : { 6, 5, 4, 3, 2, 1 })
+			{
+				if (IsVisibleBy(From, mainBonesID).first && BoneInFOV(pDev, mainBonesID, f)) {
+					return mainBonesID;
+				}
+			}
+		}
+		for (UINT i = 7; i < 30; i++)
+		{
+			if (IsVisibleBy(From, i).first && BoneInFOV(pDev, i, f)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 };
 
 struct PlayersManager {
 private:
+	DWORD64 PlayerListStart = 0x290;
+	DWORD64 PlayerStructSize = 0xD98;
 	char GetMyIndex() {
 		if (!addresses[xc("pLTClientShell")]) {
 			return -1;
@@ -120,14 +164,17 @@ private:
 		char clients = GetPtrValue<char>((PBYTE)addresses[xc("pLTClientShell")], 0x289);
 		return clients < 16 ? clients : -1;
 	}
+public:
+	PlayersManager() {
+
+	}
 	Player* GetPlayerByIndex(int PlayerIdx) {
 		if (PlayerIdx == 255 || !addresses[xc("pLTClientShell")]) {
 			return NULL;
 		}
-		return (Player*)(addresses[xc("pLTClientShell")] + 0x290 + (PlayerIdx * 0xD98));
+		return (Player*)(addresses[xc("pLTClientShell")] + PlayerListStart + (PlayerIdx * PlayerStructSize));
 	}
-public:
-	Player* Me() {
+	Player* Local() {
 		return GetPlayerByIndex(GetMyIndex());
 	}
 	std::pair<Player**, size_t> RetrieveAll() {
@@ -139,26 +186,4 @@ public:
 		}
 		return std::make_pair(list, playerCount);
 	}
-	static UINT BoneVisible(Player* From, Player* To, UINT targetBone = -1, bool withPriorityList = true) {
-		if (targetBone != -1) {
-			return To->IsVisibleBy(From, targetBone) ? targetBone : -1;
-		}
-		if (withPriorityList) {
-			for (auto mainBonesID : { 6, 5, 4, 3, 2, 1 })
-			{
-				if (To->IsVisibleBy(From, mainBonesID)) {
-					return mainBonesID;
-				}
-			}
-		}
-		for (UINT i = 7; i < 30; i++)
-		{
-			if (To->IsVisibleBy(From, i)) {
-				return i;
-			}
-		}
-		return -1;
-	}
 };
-
-PlayersManager* PlayersMgr = new PlayersManager();

@@ -38,6 +38,37 @@ enum class GradientOrientation
 	Vertical
 };
 
+struct FOV
+{
+	POINT ScreenCenter;
+	LONG Distance;
+	FOV() {
+		ScreenCenter = { 0, 0 };
+		Distance = { 0 };
+	}
+	FOV(POINT a, LONG b) {
+		ScreenCenter = a;
+		Distance = b;
+	}
+	bool Inited() {
+		return ScreenCenter.x != 0 && ScreenCenter.y != 0;
+	}
+};
+
+struct AimSearchResult {
+	UINT PlayerIndex;
+	//LTransform BoneTransform;
+	D3DXVECTOR3 BonePos;
+	UINT FramesCount;
+	UINT FramesCountNeeded;
+};
+
+enum class AimSearchType {
+	ClosestToCrosshair,
+	ClosestByDistance,
+	ByLowestHealth
+};
+
 typedef HRESULT(__stdcall* PresentFn)(IDirect3DDevice9*, CONST RECT*, CONST RECT*, HWND, CONST RGNDATA*);
 typedef HRESULT(__stdcall* ResetFn)(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*);
 typedef HRESULT(__stdcall* tReset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);

@@ -67,6 +67,12 @@ private:
 		return { X, Y, Z, RHW, color };
 	}
 public:
+	LPDIRECT3DDEVICE9 GetDevice() {
+		return pDev;
+	}
+	bool IsDeviceValid() {
+		return pDev != NULL;
+	}
 	void SetHideDrawings(bool state) {
 		hideDrawings = state;
 	}
@@ -372,10 +378,22 @@ public:
 	void DrawBone(Player* player, UINT iStart, UINT iEnd, D3DCOLOR Color)
 	{
 		if (hideDrawings) return;
-		auto StartPos = player->GetNodeTransform(iStart).m_Pos.ToDX();
-		auto EndPos = player->GetNodeTransform(iEnd).m_Pos.ToDX();
+		auto StartPos = player->GetBoneTransform2D(iStart, pDev);
+		auto EndPos = player->GetBoneTransform2D(iEnd, pDev);
 
-		if (WorldToScreen(pDev, &StartPos) && WorldToScreen(pDev, &EndPos)) DrawLine(StartPos.x, StartPos.y, EndPos.x, EndPos.y, Color);
+		if (StartPos.x != 0 && EndPos.x != 0) {
+			if (Settings->GetBool(xc("SkeletonsWithBoneNumbers"))) {
+				DrawTxt(StartPos.x, StartPos.y, std::to_string(iStart).c_str(), Color);
+				DrawTxt(EndPos.x, EndPos.y, std::to_string(iEnd).c_str(), Color);
+			}
+			if (Settings->GetBool(xc("SkeletonsWithBoneLines"))) {
+				DrawLine(StartPos.x, StartPos.y, EndPos.x, EndPos.y, Color);
+			}
+			/*if (Settings->GetBool(xc("SkeletonsWithRadiusCircles"))) {
+				int BoneRadius = GetBoneRadius(StartPos, EndPos);
+				DrawCircle(StartPos.x, StartPos.y - BoneRadius, BoneRadius, Color);
+			}*/
+		}
 	}
 	void DrawCrosshair(D3DCOLOR Color, bool cross, bool dot, bool circle)
 	{
@@ -398,54 +416,67 @@ public:
 
 		if (dot) FillRGB(cx, cy, 1, 1, Color); //Dot point
 	}
-	void DrawSkeleton(Player* player, bool withNickname, D3DCOLOR color) {
-		if (hideDrawings) return;
-		auto tHead = player->GetNodeTransform(6).m_Pos.ToDX();
-		auto tNeck = player->GetNodeTransform(5).m_Pos.ToDX();
-		if (!WorldToScreen(pDev, &tHead) || !WorldToScreen(pDev, &tNeck)) return;
+	void DrawSkeleton(Player* player, Player* me, D3DCOLOR Color) {
+		if (hideDrawings) {
+			return;
+		}
+		auto tHead = player->GetBoneTransform2D(6, pDev);
+		auto tNeck = player->GetBoneTransform2D(6, pDev);
+		if (tHead.x == 0 && tNeck == 0) {
+			return;
+		}
 		int HeadRadius = GetBoneRadius(tNeck, tHead);
+
 		int nameX = (int)tHead.x - strlen(player->Nickname) * 6;
 		int nameY = (int)tHead.y - 13;
+		if (Settings->GetBool(xc("SkeletonsWithNicknames"))) {
+			DrawTxt(nameX, nameY + 15, player->Nickname, Color);
+		}
+		if (Settings->GetBool(xc("SkeletonsWithDistance"))) {
+			DrawTxt(nameX, nameY + 15 * 2, std::to_string(GetDistance(me->GetBoneTransform(6).m_Pos, player->GetBoneTransform(6).m_Pos)).c_str(), Color);
+		}
+		if (Settings->GetBool(xc("SkeletonsWithHealth"))) {
+			DrawTxt(nameX, nameY + 15 * 4, std::to_string(player->Health).c_str(), Color);
+		}
+		if (Settings->GetBool(xc("SkeletonsWithKills"))) {
+			DrawTxt(nameX, nameY + 15 * 5, std::to_string(player->Kills).c_str(), Color);
+		}
 
-		if (withNickname) DrawTxt(nameX, nameY, player->Nickname, color);
+		if (Settings->GetBool(xc("SkeletonsWithBoneLines"))) {
+			DrawCircle(tHead.x, tHead.y - HeadRadius, HeadRadius, Color);
+		}
+		DrawBone(player, 6, 0, Color);
+		DrawBone(player, 5, 6, Color);
+		DrawBone(player, 4, 5, Color);
+		DrawBone(player, 3, 4, Color);
+		DrawBone(player, 2, 3, Color);
+		DrawBone(player, 1, 2, Color);
 
-		DrawCircle(tHead.x, tHead.y - HeadRadius, HeadRadius, color);
-		//auto me = PlayerList::Me();
-		//if (me.IsOpponent(player->TeamIndex) && PlayerList::IsVisible(me, *player) != -1) {
-		//	color = D3DCOLOR_COLORVALUE(0, 1.f, 0.f, 1.f);
-		//}
-		DrawBone(player, 6, 0, color);
-		DrawBone(player, 5, 6, color);
-		DrawBone(player, 4, 5, color);
-		DrawBone(player, 3, 4, color);
-		DrawBone(player, 2, 3, color);
-		DrawBone(player, 1, 2, color);
+		DrawBone(player, 21, 1, Color);
+		DrawBone(player, 22, 21, Color);
+		DrawBone(player, 23, 22, Color);
+		DrawBone(player, 24, 23, Color);
 
-		DrawBone(player, 21, 1, color);
-		DrawBone(player, 22, 21, color);
-		DrawBone(player, 23, 22, color);
-		DrawBone(player, 24, 23, color);
+		DrawBone(player, 25, 1, Color);
+		DrawBone(player, 26, 25, Color);
+		DrawBone(player, 27, 26, Color);
+		DrawBone(player, 28, 27, Color);
 
-		DrawBone(player, 25, 1, color);
-		DrawBone(player, 26, 25, color);
-		DrawBone(player, 27, 26, color);
-		DrawBone(player, 28, 27, color);
+		DrawBone(player, 14, 5, Color);
+		DrawBone(player, 15, 14, Color);
+		DrawBone(player, 16, 15, Color);
+		DrawBone(player, 17, 16, Color);
+		DrawBone(player, 18, 17, Color);
+		DrawBone(player, 19, 17, Color);
+		DrawBone(player, 20, 17, Color);
 
-		DrawBone(player, 14, 5, color);
-		DrawBone(player, 15, 14, color);
-		DrawBone(player, 16, 15, color);
-		DrawBone(player, 17, 16, color);
-		DrawBone(player, 18, 17, color);
-		DrawBone(player, 19, 17, color);
-		DrawBone(player, 20, 17, color);
-
-		DrawBone(player, 7, 5, color);
-		DrawBone(player, 8, 7, color);
-		DrawBone(player, 9, 8, color);
-		DrawBone(player, 10, 9, color);
-		DrawBone(player, 11, 10, color);
-		DrawBone(player, 12, 10, color);
-		DrawBone(player, 13, 10, color);
+		DrawBone(player, 7, 5, Color);
+		DrawBone(player, 8, 7, Color);
+		DrawBone(player, 9, 8, Color);
+		DrawBone(player, 10, 9, Color);
+		DrawBone(player, 11, 10, Color);
+		DrawBone(player, 12, 10, Color);
+		DrawBone(player, 13, 10, Color);
 	}
 	void DrawHealthBar(Player* Player, int x, int y)
 	{
@@ -471,24 +502,25 @@ public:
 		// Draw health fill
 		FillRGB(x + 4, y - 1, BarWidth, 3, healthColor);
 	}
-	void DrawBox2D(DWORD ESP_Color, Player* Player)
+	void DrawBox2D(Player* Player, DWORD Color)
 	{
 		if (hideDrawings) return;
-		D3DXVECTOR3 MidPosition, pLeftTop, pLeftBottom, pRightBottom, pRightTop;
+		//REPLACE IT WITH BOX MIN
+		//D3DXVECTOR3 MidPosition, pLeftTop, pLeftBottom, pRightBottom, pRightTop;
 
-		MidPosition = GetMidPoint(Player->GetBoneTransform(6).m_Pos.ToDX(), Player->GetBoneTransform(3).m_Pos.ToDX());
-		pLeftTop = MidPosition + D3DXVECTOR3(-50, 160, 0);  // <- Left Top
-		pLeftBottom = MidPosition + D3DXVECTOR3(-50, -160, 0); // <- Left Bottom
-		pRightBottom = MidPosition + D3DXVECTOR3(50, -160, 0);  // <- Right Bottom
-		pRightTop = MidPosition + D3DXVECTOR3(50, 160, 0);   // <- Right Top
+		//MidPosition = GetMidPoint(Player->GetBoneTransform(6).m_Pos.ToDX(), Player->GetBoneTransform(3).m_Pos.ToDX());
+		//pLeftTop = MidPosition + D3DXVECTOR3(-50, 50, 0);  // <- Left Top
+		//pLeftBottom = MidPosition + D3DXVECTOR3(-50, -100, 0); // <- Left Bottom
+		//pRightBottom = MidPosition + D3DXVECTOR3(50, -100, 0);  // <- Right Bottom
+		//pRightTop = MidPosition + D3DXVECTOR3(50, 50, 0);   // <- Right Top
 
-		if (WorldToScreen(pDev, &pLeftTop) && WorldToScreen(pDev, &pLeftBottom) && WorldToScreen(pDev, &pRightBottom) && WorldToScreen(pDev, &pRightTop))
-		{
-			DrawLine(pLeftBottom.x, pLeftBottom.y, pRightBottom.x, pRightBottom.y, ESP_Color); // ___ 
-			DrawLine(pLeftTop.x, pLeftTop.y, pLeftBottom.x, pLeftBottom.y, ESP_Color);         // |  
-			DrawLine(pRightBottom.x, pRightBottom.y, pRightTop.x, pRightTop.y, ESP_Color);     //   | 
-			DrawLine(pRightTop.x, pRightTop.y, pLeftTop.x, pLeftTop.y, ESP_Color);             // --- 
-		}
+		//if (WorldToScreen(pDev, &pLeftTop) && WorldToScreen(pDev, &pLeftBottom) && WorldToScreen(pDev, &pRightBottom) && WorldToScreen(pDev, &pRightTop))
+		//{
+		//	DrawLine(pLeftBottom.x, pLeftBottom.y, pRightBottom.x, pRightBottom.y, ESP_Color); // ___ 
+		//	DrawLine(pLeftTop.x, pLeftTop.y, pLeftBottom.x, pLeftBottom.y, ESP_Color);         // |  
+		//	DrawLine(pRightBottom.x, pRightBottom.y, pRightTop.x, pRightTop.y, ESP_Color);     //   | 
+		//	DrawLine(pRightTop.x, pRightTop.y, pLeftTop.x, pLeftTop.y, ESP_Color);             // --- 
+		//}
 	}
 	void DrawHP(Player* Player) {
 		if (hideDrawings) return;
@@ -500,76 +532,3 @@ public:
 };
 
 D3DEngine* D3D = new D3DEngine();
-
-HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
-	if (D3D->ShouldHide()) {
-		return oPresent(pDev, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-	}
-	D3D->SetDevice(pDev);
-	D3D->DrawTxt(20, 20, std::string(xc("present hook called ") + std::to_string(++presentHookCalledTimes) + xc(" times")).c_str(), Gold);
-	//PLACE AIMBOT, ESP, MENU HERE, BECAUSE PRESENT CALLED A LITTLE MORE THAN ENDSCENE AND OBS CAN'T CAPTURE THAT IF CHECKED "DON'T CAPTURE EXTERNAL OVERLAYS"
-	auto me = PlayersMgr->Me();
-	if (me != nullptr && me->IsValid()) {
-		if (DebugConsole->IsAttached()) {
-			DebugConsole->PrintMsg(xc("we are in fight, looping through players list..."));
-		}
-		auto playersListInfo = PlayersMgr->RetrieveAll();
-		switch (me->IsVisibleByOpponents(playersListInfo.first, me, playersListInfo.second)) {
-		case VISIBLE_BY::Opponent:
-			D3D->DrawTxt(50, 50, xc("YOU'RE VISIBLE BY OPPONENT"), Red);
-			break;
-		}
-		for (size_t i = 0; i < playersListInfo.second; i++)
-		{
-			auto player = playersListInfo.first[i];
-			if (player != nullptr && player->IsValid() && player->ClientID != me->ClientID) {
-				D3DCOLOR color;
-				if (player->TeamIndex == me->TeamIndex) {
-					//teammate
-
-				}
-				else {
-					//opponent
-					switch (player->IsVisibleByOpponents(playersListInfo.first, me, playersListInfo.second)) {
-					case VISIBLE_BY::Me:
-						color = D3DCOLOR_COLORVALUE(0.f, 1.f, 0.f, 1.f);
-						break;
-					case VISIBLE_BY::Teammate:
-						color = D3DCOLOR_COLORVALUE(1.f, 1.f, 1.f, 1.f);
-						break;
-					default:
-						color = D3DCOLOR_COLORVALUE(1.f, 0.f, 0.f, 1.f);
-						break;
-					}
-					D3D->DrawSkeleton(player, true, color);
-				}
-			}
-		}
-	}
-	return oPresent(pDev, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-}
-
-HRESULT __stdcall hkReset(IDirect3DDevice9* pDev, D3DPRESENT_PARAMETERS* pPresentationParameters) {
-	D3D->SetDevice(pDev);
-	D3D->HandleOnLost();
-	auto result = oReset(pDev, pPresentationParameters);
-	D3D->HandleOnReset();
-	return result;
-}
-
-HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
-	if (D3D->ShouldHide()) {
-		return oEndScene(pDev);
-	}
-	D3D->SetDevice(pDev);
-	D3D->DrawTxt(20, 25, std::string(xc("endscene hook called ") + std::to_string(++endsceneHookCalledTimes) + xc(" times")).c_str(), White);
-	return oEndScene(pDev);
-}
-
-bool InitDXHooks() {
-	return D3D->HookPresent(&hkPresent) && D3D->HookReset(&hkReset) && D3D->HookEndScene(&hkEndScene);
-}
-
-bool DeinitDXHooks() {
-	return D3D->HookPresent(NULL, false) && D3D->HookReset(NULL, false) && D3D->HookEndScene(NULL, false);
-}
