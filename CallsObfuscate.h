@@ -126,3 +126,4 @@ HMODULE hUser32 = GetModuleBaseAddress(xw(L"USER32.DLL"));
 #define stc(x, y) reinterpret_cast<decltype(&SetThreadContext)>(GetExportAddress(hKernel32, xc("SetThreadContext")))(x, y)
 #define rt(x) reinterpret_cast<decltype(&ResumeThread)>(GetExportAddress(hKernel32, xc("ResumeThread")))(x)
 #define loadlib(n) reinterpret_cast<decltype(&LoadLibraryA)>(GetExportAddress(hKernel32, xc("LoadLibraryA")))(n)
+#define vf(x, y, z) reinterpret_cast<decltype(&VirtualFree)>(GetExportAddress(hKernel32, xc("VirtualFree")))(x, y, z)
