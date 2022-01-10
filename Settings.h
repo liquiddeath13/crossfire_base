@@ -46,13 +46,13 @@ void InitSettings() {
 	Settings->SetBool(xc("GhostESP"), true);
 	Settings->SetBool(xc("DrawRadius"), true);
 	Settings->SetBool(xc("Aimbot"), true);
-	Settings->SetBool(xc("AutoAim"), false);
-	Settings->SetFloat(xc("AimSmooth"), 4.f);
+	Settings->SetBool(xc("AutoAim"), true);
+	Settings->SetFloat(xc("AimSmooth"), 3.8f);
 	Settings->SetInt(xc("AimSearchType"), (int)AimSearchType::ClosestByDistance);
-	Settings->SetInt(xc("AimKey"), VK_RBUTTON);
+	Settings->SetInt(xc("AimKey"), VK_LSHIFT);
 	Settings->SetBool(xc("TriggerBot"), true);
 	Settings->SetBool(xc("AutoTrigger"), false);
-	Settings->SetInt(xc("TriggerKey"), VK_LSHIFT);
+	Settings->SetInt(xc("TriggerKey"), VK_RBUTTON);
 	Settings->SetInt(xc("AimbotRadius"), 20);
 	Settings->SetInt(xc("TriggerBotRadius"), 9);
 	Settings->SetBool(xc("ESP"), true);

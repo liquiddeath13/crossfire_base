@@ -65,7 +65,13 @@ public:
 						player->VisibleBy = qv.first;
 						player->VisibleBoneID = qv.second;
 						player->VisibleByLocalPlayer = player->VisibleBy == VISIBLE_BY::Local;
-						if (Settings->GetBool(xc("Aimbot")) && GI->AimFOV.Inited() && player->VisibleBoneID != -1 && player->VisibleBy == VISIBLE_BY::Local) {
+						if (
+							(Settings->GetBool(xc("Aimbot")) || Settings->GetBool(xc("TriggerBot"))) 
+							&& GI->AimFOV.Inited() 
+							&& player->VisibleBoneID != -1 
+							&& player->VisibleBy == VISIBLE_BY::Local
+						) 
+						{
 							auto boneIdx = player->BoneVisibleInFOV(pDev, LocalPlayer, -1, true, GI->AimFOV);
 							if (boneIdx != -1) {
 								auto bonePos = player->GetBoneTransform2D(boneIdx, pDev);

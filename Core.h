@@ -23,35 +23,22 @@ public:
 			if (Cache->Ready() && D3D->IsDeviceValid()) {
 				
 				auto AimFOV = GI->AimFOV;
-				auto TriggerBotFOV = GI->TriggerBotFOV;
 
-				if (AimFOV.Inited() && TriggerBotFOV.Inited()) {
+				if (AimFOV.Inited()) {
 
 					if (Settings->GetBool(xc("DrawRadius"))) {
 						D3D->DrawCircle(AimFOV.ScreenCenter.x, AimFOV.ScreenCenter.y, GetAimbotCircleRadius(), Blue);
-						D3D->DrawCircle(TriggerBotFOV.ScreenCenter.x, TriggerBotFOV.ScreenCenter.y, GetTriggerBotCircleRadius(), Green);
 					}
 
 					auto target = Cache->GetAimTarget();
 
 					if (target.PlayerIndex != -1) {
 
-						D3DXVECTOR3 bonePos = target.BonePos;
-
-						auto dx = static_cast<LONG>(bonePos.x - GI->AimFOV.ScreenCenter.x);
-						auto dy = static_cast<LONG>(bonePos.y - GI->AimFOV.ScreenCenter.y);
+						auto dx = static_cast<LONG>(target.BonePos.x - GI->AimFOV.ScreenCenter.x);
+						auto dy = static_cast<LONG>(target.BonePos.y - GI->AimFOV.ScreenCenter.y);
 
 						if (Settings->GetBool(xc("AutoAim")) || (gaks(Settings->GetInt(xc("AimKey"))) & 0x8000)) {
 							aim->Do({ dx, dy });
-						}
-
-						if (IsBoneInFOV(bonePos, TriggerBotFOV)) {
-
-							if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
-								mevt(MOUSEEVENTF_LEFTDOWN, 0, 6, 0, 0);
-								mevt(MOUSEEVENTF_LEFTUP, 0, 6, 0, 0);
-							}
-
 						}
 
 					}
@@ -60,6 +47,36 @@ public:
 
 			}
 
+		}
+	}
+	void TriggerBotRoutine() {
+		if (Settings->GetBool(xc("TriggerBot"))) {
+
+			if (Cache->Ready() && D3D->IsDeviceValid()) {
+
+				auto TriggerBotFOV = GI->TriggerBotFOV;
+
+				if (TriggerBotFOV.Inited()) {
+
+					if (Settings->GetBool(xc("DrawRadius"))) {
+						D3D->DrawCircle(TriggerBotFOV.ScreenCenter.x, TriggerBotFOV.ScreenCenter.y, GetTriggerBotCircleRadius(), Green);
+					}
+
+					auto target = Cache->GetAimTarget();
+
+					if (target.PlayerIndex != -1) {
+
+						if (IsBoneInFOV(target.BonePos, TriggerBotFOV)) {
+
+							if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
+								mevt(MOUSEEVENTF_LEFTDOWN, 0, 6, 0, 0);
+								mevt(MOUSEEVENTF_LEFTUP, 0, 6, 0, 0);
+							}
+
+						}
+					}
+				}
+			}
 		}
 	}
 	void DrawESP() {
@@ -191,6 +208,13 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
 	ms_double = t2 - t1;
 	if (DebugConsole->IsAttached()) {
 		DebugConsole->PrintMsg(xc("execution time of AimbotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
+	}
+	t1 = high_resolution_clock::now();
+	KayaCore->TriggerBotRoutine();
+	t2 = high_resolution_clock::now();
+	ms_double = t2 - t1;
+	if (DebugConsole->IsAttached()) {
+		DebugConsole->PrintMsg(xc("execution time of TriggerBotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
 	}
 	return oEndScene(pDev);
 }
