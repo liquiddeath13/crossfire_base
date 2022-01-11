@@ -1,4 +1,5 @@
 ﻿// dllmain.cpp : Определяет точку входа для приложения DLL.
+#define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
 #include <Psapi.h>
 #include <d3d9.h>
@@ -9,6 +10,7 @@
 #include <ctime>
 #include <chrono>
 #include <shared_mutex>
+#include "sdk/inc/iltmessage.h"
 #include "XorStr.h"
 #include "OwnInternals.h"
 #include "CallsObfuscate.h"
@@ -32,7 +34,6 @@
 
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "detoursx64/detours.lib")
-
 
 void MainThread() {
     //InitializeNoAccessProtection(hModule);
@@ -65,6 +66,12 @@ void MainThread() {
             DebugConsole->PrintMsg(xc("Successfully hooked!"));
         }
     }
+
+    DetourTransactionBegin();
+    DetourUpdateThread(gct);
+    DetourAttach(&(PVOID&)addresses[xc("IntersectSegment")], &hkIntersectSegment);
+    //DetourAttach(&(PVOID&)addresses[xc("SetObjectDims")], &hkSetObjectDims);
+    DetourTransactionCommit();
 }
 
 void Unhook() {

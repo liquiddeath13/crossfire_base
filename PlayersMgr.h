@@ -9,15 +9,15 @@ enum class VISIBLE_BY {
 
 struct Player {
 private:
-	bool IsVisible(LTVector<float> FromPos3D, LTVector<float> ToPos3D) {
+	bool IsVisible(LTVector FromPos3D, LTVector ToPos3D) {
 		IntersectQuery pQuery;
 		IntersectInfo pInfo;
-		pQuery.m_From = D3DXVECTOR3{ FromPos3D.x, FromPos3D.y, FromPos3D.z };
-		pQuery.m_To = D3DXVECTOR3{ ToPos3D.x, ToPos3D.y, ToPos3D.z };
+		pQuery.m_From = FromPos3D;
+		pQuery.m_To = ToPos3D;
 		return !((tIntersectSegment)addresses[xc("IntersectSegment")])(pQuery, &pInfo);
 	}
 public:
-	void* Object;
+	HOBJECT Object;
 	char ClientID;
 	char TeamIndex;
 	char Nickname[14];
@@ -28,25 +28,12 @@ public:
 	int32_t Kills;
 	int32_t Deaths;
 	int32_t Headshots;
-	//bool Local;
-	//bool TeammateToLocal;
 	bool VisibleToLocal;
-	//VISIBLE_BY VisibleBy;
-	//UINT VisibleBoneID;
-	//float DistanceToLocal;
-
 	bool operator==(Player* rval) {
 		return rval->ClientID == ClientID;
 	}
 	bool operator!=(Player* rval) {
 		return rval->ClientID != ClientID;
-	}
-	D3DXVECTOR3 GetPos3D() {
-		return GetPtrValue<D3DXVECTOR3>((PBYTE)Object, 0x15C);
-	}
-	LTVector<float> GetPosLT() {
-		auto v = GetPos3D();
-		return {v.x, v.y, v.z};
 	}
 	bool IsOpponentTo(Player* rval) {
 		return TeamIndex != rval->TeamIndex;
@@ -83,8 +70,8 @@ public:
 		GetNodeTransform(bone, r);
 		return r;
 	}
-	UINT IsVisible(Player* From, UINT targetBone = -1, bool withPriorityList = true) {
-		auto fromHeadPos = From->GetBoneTransform(6).m_Pos;
+	UINT IsVisible(Player* From, UINT targetBone = -1, UINT fromBone = 6, bool withPriorityList = true) {
+		auto fromHeadPos = From->GetBoneTransform(fromBone).m_Pos;
 		if (targetBone != -1) {
 			return IsVisible(fromHeadPos, GetBoneTransform(targetBone).m_Pos) ? targetBone : -1;
 		}

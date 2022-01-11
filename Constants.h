@@ -6,10 +6,10 @@ const DWORD64 _drawIndexedPrimitive = 82;
 const DWORD64 _reset = 16;
 const DWORD64 _present = 17;
 
-auto defaultGoldHead = LTVector<float>(8., 8., 8.);
-auto defaultSilverHead = LTVector<float>(17., 17., 17.);
-auto defaultBody = LTVector<float>(20., 20., 20.);
-auto defaultPelvis = LTVector<float>(23., 23., 23.);
+auto defaultGoldHead = LTVector(8., 8., 8.);
+auto defaultSilverHead = LTVector(17., 17., 17.);
+auto defaultBody = LTVector(20., 20., 20.);
+auto defaultPelvis = LTVector(23., 23., 23.);
 
 #define fourccRIFF 'FFIR'
 #define fourccDATA 'atad'

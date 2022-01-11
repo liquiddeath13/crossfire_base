@@ -202,9 +202,6 @@
     <ClInclude Include="Hook\MinHook\src\HDE\table32.h" />
     <ClInclude Include="Hook\MinHook\src\HDE\table64.h" />
     <ClInclude Include="Hook\MinHook\src\trampoline.h" />
-    <ClInclude Include="LTransform.h" />
-    <ClInclude Include="LTRotation.h" />
-    <ClInclude Include="LTVector.h" />
     <ClInclude Include="NoAccessProtection.h" />
     <ClInclude Include="OverlayGfx.h" />
     <ClInclude Include="OwnInternals.h" />

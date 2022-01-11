@@ -31,6 +31,14 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 					auto espColor = visible ? Green : Red;
 					auto center = GetScreenCenter(D3D->GetDevice());
 
+					if (Settings->GetBool(xc("DrawRadius"))) {
+						D3D->DrawCircle(GI->AimFOV.ScreenCenter.x, GI->AimFOV.ScreenCenter.y, Settings->GetInt(xc("AimbotRadius")), Blue);
+					}
+
+					if (Settings->GetBool(xc("DrawRadius"))) {
+						D3D->DrawCircle(GI->TriggerBotFOV.ScreenCenter.x, GI->TriggerBotFOV.ScreenCenter.y, Settings->GetInt(xc("TriggerBotRadius")), Green);
+					}
+
 					if (Settings->GetBool(xc("Skeletons"))) {
 
 						D3D->DrawSkeleton(player, LocalPlayer, espColor);
@@ -64,7 +72,7 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 
 		auto t2 = high_resolution_clock::now();
 		duration<double, std::milli> ms_double = t2 - t1;
-		if (DebugConsole->IsAttached()) {
+		if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
 			DebugConsole->PrintMsg(xc("[hkPresent] execution time of enumeration: ") + std::to_string(ms_double.count()) + xc(" ms"));
 		}
 	}
@@ -167,11 +175,9 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
 
 		}
 
-
-
 		auto t2 = high_resolution_clock::now();
 		duration<double, std::milli> ms_double = t2 - t1;
-		if (DebugConsole->IsAttached()) {
+		if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
 			DebugConsole->PrintMsg(xc("[hkEndScene] execution time of enumeration: ") + std::to_string(ms_double.count()) + xc(" ms"));
 		}
 
@@ -179,9 +185,6 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
 			t1 = high_resolution_clock::now();
 			
 			{
-				if (Settings->GetBool(xc("DrawRadius"))) {
-					D3D->DrawCircle(GI->AimFOV.ScreenCenter.x, GI->AimFOV.ScreenCenter.y, Settings->GetInt(xc("AimbotRadius")), Blue);
-				}
 
 				auto dx = static_cast<LONG>(TargetSearchResult.BonePos.x - GI->AimFOV.ScreenCenter.x);
 				auto dy = static_cast<LONG>(TargetSearchResult.BonePos.y - GI->AimFOV.ScreenCenter.y) + 1;
@@ -193,37 +196,31 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
 
 			t2 = high_resolution_clock::now();
 			ms_double = t2 - t1;
-			if (DebugConsole->IsAttached()) {
+			if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
 				DebugConsole->PrintMsg(xc("execution time of AimbotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
 			}
 
-			if (endsceneHookCalledTimes % 2 == 0) {
-				t1 = high_resolution_clock::now();
-				
-				{
-					FOV f = GI->TriggerBotFOV;
+			t1 = high_resolution_clock::now();
 
-					f.RescaleByDistance(TargetSearchResult.DistanceThroughMap, 3000, 600, 0.24f);
+			{
+				FOV f = GI->TriggerBotFOV;
 
-					if (Settings->GetBool(xc("DrawRadius"))) {
-						D3D->DrawCircle(f.ScreenCenter.x, f.ScreenCenter.y, Settings->GetInt(xc("TriggerBotRadius")), Green);
+				f.RescaleByDistance(TargetSearchResult.DistanceThroughMap, 3000, 1400, 0.2f);
+
+				if (IsBoneInFOV(TargetSearchResult.BonePos, f)) {
+
+					if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
+						mevt(MOUSEEVENTF_LEFTDOWN, 0, 10, 0, 0);
+						mevt(MOUSEEVENTF_LEFTUP, 0, 10, 0, 0);
 					}
 
-					if (IsBoneInFOV(TargetSearchResult.BonePos, f)) {
-
-						if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
-							mevt(MOUSEEVENTF_LEFTDOWN, 0, 10, 0, 0);
-							mevt(MOUSEEVENTF_LEFTUP, 0, 10, 0, 0);
-						}
-
-					}
 				}
+			}
 
-				t2 = high_resolution_clock::now();
-				ms_double = t2 - t1;
-				if (DebugConsole->IsAttached()) {
-					DebugConsole->PrintMsg(xc("execution time of TriggerBotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
-				}
+			t2 = high_resolution_clock::now();
+			ms_double = t2 - t1;
+			if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
+				DebugConsole->PrintMsg(xc("execution time of TriggerBotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
 			}
 		}
 
@@ -237,4 +234,108 @@ bool InitDXHooks() {
 
 bool DeinitDXHooks() {
 	return D3D->HookPresent(NULL, false) && D3D->HookReset(NULL, false) && D3D->HookEndScene(NULL, false);
+}
+
+LTRESULT hkSendToServer(void* pCLTClient, ILTMessage_Read* pMsg, uint32 flags)
+{
+	if (pMsg) {
+		auto msgId = pMsg->Peekuint8();
+		pMsg->SeekTo(0);
+
+		if (DebugConsole->IsAttached()) {
+			DebugConsole->PrintMsg(xc("Got message id ") + std::to_string(msgId) + xc(" from hkSendToServer"));
+		}
+	}
+
+	return ((tSend2Server)(addresses[xc("SendToServer")]))(pCLTClient, pMsg, flags);
+}
+
+float hb_multiplier[] = { 2.5f, 2.5f, 2.5f, 2.5f };
+void setDims(LTVector* dim) {
+	if (*dim == defaultGoldHead) {
+		dim->x *= hb_multiplier[0];
+		dim->y *= hb_multiplier[0];
+		dim->z *= hb_multiplier[0];
+	}
+	if (*dim == defaultSilverHead) {
+		dim->x *= hb_multiplier[1];
+		dim->y *= hb_multiplier[1];
+		dim->z *= hb_multiplier[1];
+	}
+	if (*dim == defaultBody) {
+		dim->x *= hb_multiplier[2];
+		dim->y *= hb_multiplier[2];
+		dim->z *= hb_multiplier[2];
+	}
+	if (*dim == defaultPelvis) {
+		dim->x *= hb_multiplier[3];
+		dim->y *= hb_multiplier[3];
+		dim->z *= hb_multiplier[3];
+	}
+}
+
+signed __int64 __fastcall hkSetObjectDims(void* a1, LTObject* hObj, LTVector* dim, UINT32 flags) {
+	if (flags == 0) {
+		setDims(dim);
+	}
+	return ((tSetObjectDims)addresses[xc("SetObjectDims")])(a1, hObj, dim, flags);
+}
+
+bool MyFilterObjects(HOBJECT hObj, void* pUser)
+{
+	auto LocalPlayer = PlayersMgr->Local();
+	auto fn = ((tIntersectSegment)addresses[xc("IntersectSegment")]);
+	for (int i = 0; i <= 16; i++)
+	{
+		Player* player = PlayersMgr->GetPlayerByIndex(i);
+
+		if (player != nullptr && player->IsValid() && hObj == player->Object)
+		{
+			return false;
+		}
+
+	}
+	return true;
+}
+
+bool hkIntersectSegment(IntersectQuery* Query, IntersectInfo* Info)
+{
+	auto LocalPlayer = PlayersMgr->Local();
+	auto fn = ((tIntersectSegment)addresses[xc("IntersectSegment")]);
+	auto localHead = LocalPlayer->GetBoneTransform(6).m_Pos;
+	auto radius = LTVector(0.0f, 20.0f, 0.0f);
+	if (LocalPlayer != nullptr && LocalPlayer->IsValid() && LocalPlayer->IsAlive()) {
+		for (int i = 0; i < 16; i++)
+		{
+			Player* player = PlayersMgr->GetPlayerByIndex(i);
+
+			if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer))
+			{
+				auto headBonePos = player->GetBoneTransform(6).m_Pos;
+
+				IntersectQuery pQuery;
+				IntersectInfo pInfo;
+
+				pQuery.m_From = localHead;
+				pQuery.m_To = headBonePos;
+				if (fn(pQuery, &pInfo)) {
+					continue;
+				}
+
+				Query->m_From = headBonePos + radius;
+				Query->m_To = headBonePos - radius;
+				Query->m_Flags = ::INTERSECT_OBJECTS/* | ::IGNORE_NONSOLID | ::INTERSECT_HPOLY*/;
+				Query->m_FilterFn = MyFilterObjects;
+
+				bool Result = fn(*Query, Info);
+				if (Result)
+				{
+					Info->m_hObject = player->Object;
+					Info->m_Point = headBonePos;
+					return fn(*Query, Info);
+				}
+			}
+		}
+	}
+	return fn(*Query, Info);
 }

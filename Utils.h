@@ -257,7 +257,7 @@ POINT GetScreenCenter(IDirect3DDevice9* pDev)
 	return{ static_cast<LONG>(viewport.Width / 2), static_cast<LONG>(viewport.Height / 2) };
 }
 
-float GetDistance(LTVector<float> pt1, LTVector<float> pt2)
+float GetDistance(LTVector pt1, LTVector pt2)
 {
 	return static_cast<float>(sqrt((pt2.y - pt1.y) * (pt2.y - pt1.y) + (pt2.x - pt1.x) * (pt2.x - pt1.x) + (pt2.z - pt1.z) * (pt2.z - pt1.z)));
 }

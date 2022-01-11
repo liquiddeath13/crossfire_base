@@ -30,35 +30,36 @@ SettingsEngine* Settings;
 
 void InitSettings() {
 	Settings = new SettingsEngine();
+	Settings->SetBool(xc("CountPerformance"), false);
 	Settings->SetBool(xc("PreventFpsDrop"), true);
-	Settings->SetBool(xc("UseDebugConsole"), false);
-	Settings->SetBool(xc("Skeletons"), false);
+	Settings->SetBool(xc("UseDebugConsole"), true);
+	Settings->SetBool(xc("Skeletons"), true);
 	Settings->SetBool(xc("2DBoxes"), false);
-	Settings->SetBool(xc("LinesFromCenterToHead"), false);
-	Settings->SetBool(xc("SkeletonsWithNicknames"), false);
-	Settings->SetBool(xc("SkeletonsWithBoneLines"), false);
+	Settings->SetBool(xc("LinesFromCenterToHead"), true);
+	Settings->SetBool(xc("SkeletonsWithNicknames"), true);
+	Settings->SetBool(xc("SkeletonsWithBoneLines"), true);
 	Settings->SetBool(xc("SkeletonsWithDistance"), false);
 	Settings->SetBool(xc("SkeletonsWithKills"), false);
 	Settings->SetBool(xc("SkeletonsWithHealth"), false);
 	Settings->SetBool(xc("SkeletonsWithBoneNumbers"), false);
 	Settings->SetBool(xc("SkeletonsWithRadiusCircles"), false);
-	Settings->SetBool(xc("DrawRadius"), false);
+	Settings->SetBool(xc("DrawRadius"), true);
 	Settings->SetBool(xc("Aimbot"), true);
 	Settings->SetBool(xc("AutoAim"), true);
-	Settings->SetFloat(xc("AimSmooth"), 3.75f);
+	Settings->SetFloat(xc("AimSmooth"), 1.35f);
 	Settings->SetInt(xc("AimSearchType"), (int)AimSearchType::ClosestByDistance);
 	Settings->SetBool(xc("TriggerBot"), true);
-	Settings->SetBool(xc("AutoTrigger"), false);
+	Settings->SetBool(xc("AutoTrigger"), true);
 	Settings->SetInt(xc("AimKey"), VK_LSHIFT);
 	Settings->SetInt(xc("AimKeyONOFF"), VK_SCROLL);
 	Settings->SetInt(xc("TriggerKey"), VK_RBUTTON);
 	Settings->SetInt(xc("TriggerKeyONOFF"), VK_PAUSE);
-	Settings->SetInt(xc("AimbotRadius"), 30);
-	Settings->SetInt(xc("TriggerBotRadius"), 9);
-	Settings->SetBool(xc("ESP"), false);
+	Settings->SetInt(xc("AimbotRadius"), 40);
+	Settings->SetInt(xc("TriggerBotRadius"), 8);
+	Settings->SetBool(xc("ESP"), true);
 	/*Settings->SetFloat(xc("WorkMaxDistance"), 11000.f);
 	Settings->SetFloat(xc("ESPMaxDistance"), 11000.f);
 	Settings->SetFloat(xc("AimMaxDistance"), 11000.f);
 	Settings->SetFloat(xc("TriggerBotMaxDistance"), 11000.f);*/
-	Settings->SetBool(xc("YouAreVisibleAlarm"), false);
+	Settings->SetBool(xc("YouAreVisibleAlarm"), true);
 }

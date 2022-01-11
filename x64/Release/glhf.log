@@ -1,12 +1,12 @@
 ﻿  dllmain.cpp
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(58,22): warning C4244: инициализация: преобразование "float" в "size_t", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(61,26): warning C4244: *=: преобразование "float" в "LONG", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(65,1): warning C4305: *=: усечение из "double" в "float"
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(66,23): warning C4244: инициализация: преобразование "float" в "size_t", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(69,20): warning C4244: *=: преобразование "float" в "LONG", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(55,22): warning C4244: инициализация: преобразование "float" в "size_t", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(58,26): warning C4244: *=: преобразование "float" в "LONG", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(62,1): warning C4305: *=: усечение из "double" в "float"
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(63,23): warning C4244: инициализация: преобразование "float" в "size_t", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Types.h(66,20): warning C4244: *=: преобразование "float" в "LONG", возможна потеря данных
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\Utils.h(218,20): warning C4244: return: преобразование "double" в "size_t", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(94,1): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(95,1): warning C4267: return: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(93,1): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\PlayersMgr.h(94,1): warning C4267: return: преобразование из "size_t" в "UINT"; возможна потеря данных
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(216,1): warning C4267: аргумент: преобразование из "size_t" в "INT"; возможна потеря данных
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(386,33): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(386,21): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
@@ -20,15 +20,15 @@ C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(445,20): warning C4
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(528,46): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\D3D.h(528,33): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
 C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(23,48): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(44,38): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(44,28): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(54,68): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(54,30): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(102,40): warning C4838: Преобразование из "int" в "UINT" требует сужающего преобразования.
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(109,48): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(153,44): warning C4267: =: преобразование из "size_t" в "UINT"; возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(183,92): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(209,75): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(35,93): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(39,107): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(52,38): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(52,28): warning C4244: аргумент: преобразование "LONG" в "float", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(62,68): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(62,30): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(110,40): warning C4838: Преобразование из "int" в "UINT" требует сужающего преобразования.
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(117,48): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(161,44): warning C4267: =: преобразование из "size_t" в "UINT"; возможна потеря данных
   buffer.c
   hde32.c
   hde64.c
@@ -36,6 +36,6 @@ C:\Users\000\source\repos\liquiddeath13\crossfire_base\Core.h(209,75): warning C
   trampoline.c
   Создание кода
   Previous IPDB not found, fall back to full compilation.
-  All 1833 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 1897 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Создание кода завершено
   glhf.vcxproj -> C:\Windows\System32\d3dref9.dll

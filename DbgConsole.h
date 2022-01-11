@@ -43,6 +43,9 @@ public:
 	void PrintMsg(std::string msg) {
 		std::cout << msg << std::endl;
 	}
+	void PrintMsg(std::wstring msg) {
+		std::wcout << msg << std::endl;
+	}
 };
 
 DbgConsole* DebugConsole = new DbgConsole();

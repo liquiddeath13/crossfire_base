@@ -41,6 +41,13 @@ std::unordered_map<std::string, Pattern> patterns{
 			"E8 ? ? ? ? 4C 8B C8 48 85 C0 0F 84 ? ? ? ? F3 0F 10 88 ? ? ? ? F3 0F 10 80",
 			0x0
 		}
+	},
+	{
+		xc("SendToServer"), Pattern{
+			xc("crossfire.exe"),
+			"44 89 44 24 ? 48 89 54 24 ? 48 89 4C 24 ? 48 81 EC ? ? ? ? 48 C7 84 24 ? ? ? ? ? ? ? ? 48 8B 84 24 ? ? ? ? 0F",
+			0x0
+		}
 	}
 };
 
