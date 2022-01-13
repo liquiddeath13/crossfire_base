@@ -10,11 +10,13 @@ enum class VISIBLE_BY {
 struct Player {
 private:
 	bool IsVisible(LTVector FromPos3D, LTVector ToPos3D) {
+		auto fn = ((tIntersectSegment)addresses[xc("IntersectSegment")]);
 		IntersectQuery pQuery;
 		IntersectInfo pInfo;
 		pQuery.m_From = FromPos3D;
 		pQuery.m_To = ToPos3D;
-		return !((tIntersectSegment)addresses[xc("IntersectSegment")])(pQuery, &pInfo);
+		pQuery.m_Flags = ::IGNORE_NONSOLID;
+		return !fn(pQuery, &pInfo);
 	}
 public:
 	HOBJECT Object;
@@ -45,19 +47,25 @@ public:
 		return Health > 0;
 	}
 	float DistanceTo(Player* rval) {
-		return GetDistance(GetBoneTransform(6).m_Pos, rval->GetBoneTransform(6).m_Pos);
+		return GetDistance(FastGetBonePos(6), rval->FastGetBonePos(6));
 	}
-	LTransform GetBoneTransform(UINT Bone) {
+	std::pair<POINT, LTVector> GetBoneTransform(UINT Bone, IDirect3DDevice9* pDev = nullptr) {
 		LTransform Trans;
 		if (addresses[xc("GetNodeTransform")]) ((tGetNodeTransform)addresses[xc("GetNodeTransform")])(0, Object, Bone, &Trans, true);
-		return Trans;
-	}
-	D3DXVECTOR3 GetBoneTransform2D(UINT Bone, IDirect3DDevice9* pDev) {
-		auto bonePos = GetBoneTransform(Bone).m_Pos.ToDX();
-		if (WorldToScreen(pDev, &bonePos)) {
-			return bonePos;
+		auto bonePos = Trans.m_Pos;
+		if (pDev == nullptr) {
+			return std::make_pair(POINT{ 0, 0 }, bonePos);
 		}
-		return { 0,0,0 };
+		auto native = bonePos;
+		if (WorldToScreen(pDev, &bonePos)) {
+			return std::make_pair(POINT{ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, native);
+		}
+		return std::make_pair(POINT{ 0, 0 }, native);
+	}
+	LTVector FastGetBonePos(UINT Bone) {
+		LTransform Trans;
+		if (addresses[xc("GetNodeTransform")]) ((tGetNodeTransform)addresses[xc("GetNodeTransform")])(0, Object, Bone, &Trans, true);
+		return Trans.m_Pos;
 	}
 	void GetNodeTransform(UINT Bone, LTransform& Out) {
 		LTransform Trans;
@@ -70,25 +78,125 @@ public:
 		GetNodeTransform(bone, r);
 		return r;
 	}
-	UINT IsVisible(Player* From, UINT targetBone = -1, UINT fromBone = 6, bool withPriorityList = true) {
-		auto fromHeadPos = From->GetBoneTransform(fromBone).m_Pos;
+	bool IsVisibleBy(Player* From, UINT targetBone) {
+		return IsVisible(From->GetBoneTransform(5).second, GetBoneTransform(targetBone).second);
+	}
+	bool FastIsVisibleBy(Player* From, UINT targetBone) {
+		return IsVisible(From->FastGetBonePos(5), FastGetBonePos(6));
+	}
+	UINT GetVisibleBone(Player* From, IDirect3DDevice9* pDev = nullptr, FOV f = {}, bool withFovCheck = false, UINT targetBone = -1, UINT fromBone = 6) {
+		auto fromHeadPos = From->GetBoneTransform(fromBone).second;
+
 		if (targetBone != -1) {
-			return IsVisible(fromHeadPos, GetBoneTransform(targetBone).m_Pos) ? targetBone : -1;
+			auto bt = GetBoneTransform(targetBone, pDev);
+			if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+				return -1;
+			}
+			return IsVisible(fromHeadPos, bt.second) ? targetBone : -1;
 		}
-		if (withPriorityList) {
-			for (size_t i = 6; i > 0; i--)
-			{
-				if (IsVisible(fromHeadPos, GetBoneTransform(i).m_Pos)) {
-					return i;
+
+		if (IsVisible(fromHeadPos, GetBoneTransform(leftHandFirstBone).second)) {
+			for (const auto& bone : upperBodyBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+			for (const auto& bone : leftHandBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
 				}
 			}
 		}
-		for (UINT i = 7; i < 30; i++)
-		{
-			if (IsVisible(fromHeadPos, GetBoneTransform(i).m_Pos)) {
-				return i;
+
+		if (IsVisible(fromHeadPos, GetBoneTransform(rightHandFirstBone).second)) {
+			for (const auto& bone : upperBodyBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+			for (const auto& bone : rightHandBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
 			}
 		}
+
+		if (IsVisible(fromHeadPos, GetBoneTransform(leftLegFirstBone).second)) {
+			for (const auto& bone : upperBodyBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+			for (const auto& bone : lowerBodyBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+			for (const auto& bone : leftLegBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+		}
+
+		if (IsVisible(fromHeadPos, GetBoneTransform(rightLegFirstBone).second)) {
+			for (const auto& bone : upperBodyBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+			for (const auto& bone : lowerBodyBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+			for (const auto& bone : rightLegBones) {
+				auto bt = GetBoneTransform(bone, pDev);
+				if (withFovCheck && (bt.first.x == 0 || !IsPointInFOV(bt.first, f))) {
+					continue;
+				}
+				if (IsVisible(fromHeadPos, bt.second)) {
+					return bone;
+				}
+			}
+		}
+
 		return -1;
 	}
 };

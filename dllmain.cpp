@@ -18,12 +18,13 @@
 #include "Types.h"
 #include "Settings.h"
 #include "Sig.hpp"
+#include "Colors.h"
+#include "GameInfo.h"
 #include "Utils.h"
 #include "Patterns.h"
 #include "Constants.h"
 #include "PlayersMgr.h"
 #include "WeaponMgr.h"
-#include "GameInfo.h"
 #include "Aimbot.h"
 #include "detoursx64/detours.h"
 #include "Hook/hook.h"
@@ -40,32 +41,14 @@ void MainThread() {
     while (!IsGameReadyForHook()) {
         sleep(100);
     }
-    if (DebugConsole->IsAttached()) {
-        DebugConsole->PrintMsg(xc("Initializing addresses..."));
-    }
     InitAddresses();
-    if (addresses[xc("pLTClientShell")]) {
-        if (DebugConsole->IsAttached()) {
-            DebugConsole->PrintMsg(xc("Successfully initialized!"));
-        }
-    }
-    if (DebugConsole->IsAttached()) {
-        DebugConsole->PrintMsg(xc("Initializing MH..."));
-    }
-    if (MH_Initialize() == MH_OK) {
-        if (DebugConsole->IsAttached()) {
-            DebugConsole->PrintMsg(xc("Successfully inited!"));
-        }
-    }
+    MH_Initialize();
+    InitDXHooks();
+
     aim->SetSmooth(Settings->GetFloat(xc("AimSmooth")));
-    if (DebugConsole->IsAttached()) {
-        DebugConsole->PrintMsg(xc("Initializing DX hooks..."));
-    }
-    if (InitDXHooks()) {
-        if (DebugConsole->IsAttached()) {
-            DebugConsole->PrintMsg(xc("Successfully hooked!"));
-        }
-    }
+    GI->AimbotFOV = { Settings->GetInt(xc("AimbotRadius")) };
+    GI->TriggerBotFOV = { Settings->GetInt(xc("TriggerBotRadius")) };
+    GI->SilentAimFOV = { Settings->GetInt(xc("SilentAimRadius")) };
 
     DetourTransactionBegin();
     DetourUpdateThread(gct);
@@ -101,13 +84,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     if (Settings->GetBool(xc("UseDebugConsole"))) {
         if (!DebugConsole->IsAttached()) {
             DebugConsole->Attach();
-            if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
-                DebugConsole->PrintMsg(xc("Settings initialized"));
-            }
         }
     }
     if (ul_reason_for_call == DLL_PROCESS_ATTACH) {
-        StartHidden((LPTHREAD_START_ROUTINE)MainThread, xw(L"mrac_x64.dll"), 0x1337);
+        StartHidden((LPTHREAD_START_ROUTINE)MainThread, xw(L"mrac64.dll"), 0x1337);
     }
     if (ul_reason_for_call == DLL_PROCESS_DETACH) {
         Unhook();

@@ -7,16 +7,35 @@ using std::chrono::milliseconds;
 
 HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
 	//OBS CAN'T CAPTURE THAT IF CHECKED "DON'T CAPTURE EXTERNAL OVERLAYS"
-	if (D3D->ShouldHide()) {
+
+	if (D3D->ShouldHide() || IsModuleOwner(xc("mrac64.dll"), (DWORD64)_ReturnAddress())) {
 		return oPresent(pDev, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
 	}
+	auto presentStart = high_resolution_clock::now();
 	D3D->SetDevice(pDev);
 	//D3D->DrawTxt(20, 20, std::string(xc("present hook called ") + std::to_string(++presentHookCalledTimes) + xc(" times")).c_str(), Gold);
+
+	if (Settings->GetBool(xc("DrawFeaturesStatus"))) {
+		GI->SetDebugLine("Aimbot", xc("state: ") + Settings->GetBool(xc("Aimbot")) ? xc("ON") : xc("OFF"));
+		GI->SetDebugLine("ESP", xc("state: ") + Settings->GetBool(xc("ESP")) ? xc("ON") : xc("OFF"));
+		GI->SetDebugLine("SilentAim", xc("state: ") + Settings->GetBool(xc("SilentAim")) ? xc("ON") : xc("OFF"));
+		GI->SetDebugLine("TriggerBot", xc("state: ") + Settings->GetBool(xc("TriggerBot")) ? xc("ON") : xc("OFF"));
+	}
+	
+	if (Settings->GetBool(xc("DrawDebug"))) {
+		D3D->DrawDebug();
+	}
+	
 	auto LocalPlayer = PlayersMgr->Local();
 
 	if (LocalPlayer != nullptr && LocalPlayer->IsValid() && LocalPlayer->IsAlive()) {
+		
 
-		auto t1 = high_resolution_clock::now();
+		if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
+
+			GI->ClearVisibleByList();
+
+		}
 
 		for (size_t i = 0; i < 16; i++)
 		{
@@ -24,7 +43,7 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 
 			if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer)) {
 				
-				bool visible = player->IsVisible(LocalPlayer, 6) != -1;
+				bool visible = player->FastIsVisibleBy(LocalPlayer, 6);
 				
 				if (Settings->GetBool(xc("ESP"))) {
 
@@ -32,11 +51,15 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 					auto center = GetScreenCenter(D3D->GetDevice());
 
 					if (Settings->GetBool(xc("DrawRadius"))) {
-						D3D->DrawCircle(GI->AimFOV.ScreenCenter.x, GI->AimFOV.ScreenCenter.y, Settings->GetInt(xc("AimbotRadius")), Blue);
-					}
-
-					if (Settings->GetBool(xc("DrawRadius"))) {
-						D3D->DrawCircle(GI->TriggerBotFOV.ScreenCenter.x, GI->TriggerBotFOV.ScreenCenter.y, Settings->GetInt(xc("TriggerBotRadius")), Green);
+						if (Settings->GetBool(xc("Aimbot"))) {
+							D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->AimbotFOV.InitialDistance, Blue);
+						}
+						if (Settings->GetBool(xc("TriggerBot"))) {
+							D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->TriggerBotFOV.RescaledDistance, Green);
+						}
+						if (Settings->GetBool(xc("SilentAim"))) {
+							D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->SilentAimFOV.InitialDistance, White);
+						}
 					}
 
 					if (Settings->GetBool(xc("Skeletons"))) {
@@ -47,19 +70,19 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 
 					if (Settings->GetBool(xc("LinesFromCenterToHead"))) {
 
-						auto headBone = player->GetBoneTransform2D(6, D3D->GetDevice());
-						if (headBone.x != 0 && headBone.z != 0) {
-							D3D->DrawLine(center.x, center.y, headBone.x, headBone.y, espColor);
+						auto headBone = player->GetBoneTransform(6, D3D->GetDevice());
+						if (headBone.first.x != 0 && headBone.first.y != 0) {
+							D3D->DrawLine(center.x, center.y, headBone.first.x, headBone.first.y, espColor);
 						}
 
 					}
 
 					if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
 
-						if (LocalPlayer->IsVisible(player, 6) != -1) {
-							auto visibleStr = std::string(xc("YOU'RE VISIBLE BY ") + std::string(player->Nickname));
+						if (LocalPlayer->FastIsVisibleBy(player, 5)) {
 
-							D3D->DrawTxt(center.x - visibleStr.length() / 1.5, center.y - center.y * .2f, visibleStr.c_str(), Red);
+							GI->AppendVisibleByList(player->Nickname, i);
+
 						}
 
 					}
@@ -70,11 +93,18 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 
 		}
 
-		auto t2 = high_resolution_clock::now();
-		duration<double, std::milli> ms_double = t2 - t1;
-		if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
-			DebugConsole->PrintMsg(xc("[hkPresent] execution time of enumeration: ") + std::to_string(ms_double.count()) + xc(" ms"));
+		if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
+
+			D3D->DrawVisibleByList();
+
 		}
+		
+	}
+
+	if (Settings->GetBool(xc("CountPerformance"))) {
+		auto presentEnd = high_resolution_clock::now();
+		duration<double, std::milli> ms_double = presentEnd - presentStart;
+		GI->SetDebugLine(xc("hkPresent performance"), xc("delay: ") + std::to_string(ms_double.count()) + xc(" ms"));
 	}
 
 	return oPresent(pDev, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
@@ -87,144 +117,175 @@ HRESULT __stdcall hkReset(IDirect3DDevice9* pDev, D3DPRESENT_PARAMETERS* pPresen
 	return result;
 }
 
+TSResult GetTarget(UINT preferableBone, FOV f, AimSearchType SearchType, std::string callerFn) {
+	GI->ScreenCenter = GetScreenCenter(D3D->GetDevice());
+	auto LocalPlayer = PlayersMgr->Local();
+	TSResult TargetSearchResult{ -1,{} };
+	DOUBLE closestPos = 99999;
+	if (!D3D->IsDeviceValid() || (LocalPlayer == nullptr || !LocalPlayer->IsValid() || !LocalPlayer->IsAlive()) || GI->ScreenCenter.x == 0) {
+		GI->SetDebugLine(callerFn, xc("GetTarget: not valid"));
+		return TargetSearchResult;
+	}
+	else {
+		//GI->SetDebugLine(callerFn, xc("GetTarget: searching..."));
+	}
+	for (size_t i = 0; i < 16; i++)
+	{
+		auto player = PlayersMgr->GetPlayerByIndex(i);
+
+		if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer)) {
+
+			if (preferableBone == -1) {
+				preferableBone = player->GetVisibleBone(LocalPlayer, D3D->GetDevice(), f, true);
+				if (preferableBone == -1) {
+					continue;
+				}
+			}
+			else {
+				if (!player->FastIsVisibleBy(LocalPlayer, preferableBone)) {
+					continue;
+				}
+			}
+
+			auto bonePos = player->GetBoneTransform(preferableBone, D3D->GetDevice());
+
+			if (bonePos.first.x != 0 && bonePos.first.y != 0) {
+
+				auto distanceFromCrosshair = GetDistance(bonePos.first, GI->ScreenCenter);
+
+				if (distanceFromCrosshair <= f.InitialDistance) {
+
+					auto distance = player->DistanceTo(LocalPlayer);
+					bool should = false;
+
+					switch (SearchType) {
+					case AimSearchType::ByLowestHealth:
+						if (player->Health < closestPos) {
+							closestPos = player->Health;
+							should = true;
+						}
+						break;
+					case AimSearchType::ClosestByDistance:
+						if (distance < closestPos) {
+							closestPos = distance;
+							should = true;
+						}
+						break;
+					case AimSearchType::ClosestToCrosshair:
+						if (distanceFromCrosshair < closestPos)
+						{
+							closestPos = distanceFromCrosshair;
+							should = true;
+						}
+						break;
+					}
+					if (should) {
+						TargetSearchResult.PlayerIndex = i;
+						TargetSearchResult.BonePos = bonePos;
+						TargetSearchResult.DistanceThroughMap = distance;
+						TargetSearchResult.PlayerObject = player->Object;
+						TargetSearchResult.BoneId = preferableBone;
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	if (TargetSearchResult.PlayerIndex != -1) {
+		GI->SetDebugLine(
+			callerFn,
+			xc("GetTarget: ") + std::string(PlayersMgr->GetPlayerByIndex(TargetSearchResult.PlayerIndex)->Nickname) + xc(", ") + std::to_string(TargetSearchResult.BoneId)
+		);
+	}
+
+	return TargetSearchResult;
+}
+
 HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
-	if (D3D->ShouldHide()) {
+	if (D3D->ShouldHide() || IsModuleOwner(xc("mrac64.dll"), (DWORD64)_ReturnAddress())) {
 		return oEndScene(pDev);
 	}
+	auto endsceneStart = high_resolution_clock::now();
+	duration<double, std::milli> ms_double;
 	D3D->SetDevice(pDev);
 	//D3D->DrawTxt(20, 25, std::string(xc("endscene hook called ") + std::to_string(++endsceneHookCalledTimes) + xc(" times")).c_str(), White);
 
-	if (gaks(Settings->GetInt(xc("AimKeyONOFF")))) {
+	if (gaks(Settings->GetInt(xc("AimKeyONOFF"))) & 1) {
 		Settings->SetBool(xc("Aimbot"), !Settings->GetBool(xc("Aimbot")));
 	}
-	if (gaks(Settings->GetInt(xc("TriggerKeyONOFF")))) {
+	if (gaks(Settings->GetInt(xc("TriggerKeyONOFF"))) & 1) {
 		Settings->SetBool(xc("TriggerBot"), !Settings->GetBool(xc("TriggerBot")));
 	}
 
-	auto LocalPlayer = PlayersMgr->Local();
 	++endsceneHookCalledTimes;
-	if (LocalPlayer != nullptr && LocalPlayer->IsValid() && LocalPlayer->IsAlive()) {
-		
-		GI->AimFOV = { GetScreenCenter(pDev), Settings->GetInt(xc("AimbotRadius")) };
-		GI->TriggerBotFOV = { GetScreenCenter(pDev), Settings->GetInt(xc("TriggerBotRadius")) };
-		AimSearchResult TargetSearchResult{ -1,{} };
-		DOUBLE closestPos = 99999;
 
-		auto t1 = high_resolution_clock::now();
+	auto t1 = high_resolution_clock::now();
+	
+	auto AimbotTarget = GetTarget(
+		Settings->GetInt(xc("AimbotBone")), 
+		GI->AimbotFOV, 
+		(AimSearchType)(Settings->GetInt(xc("AimbotSearchType"))), 
+		xc("hkEndScene")
+	);
 
-		for (size_t i = 0; i < 16; i++)
-		{
-			auto player = PlayersMgr->GetPlayerByIndex(i);
-
-			if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer)) {
-				
-				if (Settings->GetBool(xc("Aimbot"))) {
-
-					bool visible = player->IsVisible(LocalPlayer, 6) != -1;
-
-					if (visible) {
-
-						//head is visible
-						auto bonePos = player->GetBoneTransform2D(6, D3D->GetDevice());
-
-						if (bonePos.x != 0 && bonePos.y != 0) {
-
-							auto aimDistance = GetDistance({ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, GI->AimFOV.ScreenCenter);
-
-							if (aimDistance <= GI->AimFOV.Distance) {
-
-								auto distance = player->DistanceTo(LocalPlayer);
-								bool should = false;
-
-								switch ((AimSearchType)(Settings->GetInt(xc("AimSearchType")))) {
-								case AimSearchType::ByLowestHealth:
-									if (player->Health < closestPos) {
-										closestPos = player->Health;
-										should = true;
-									}
-									break;
-								case AimSearchType::ClosestByDistance:
-									if (distance < closestPos) {
-										closestPos = distance;
-										should = true;
-									}
-									break;
-								case AimSearchType::ClosestToCrosshair:
-									if (aimDistance < closestPos)
-									{
-										closestPos = aimDistance;
-										should = true;
-									}
-									break;
-								}
-								if (should) {
-									TargetSearchResult.PlayerIndex = i;
-									TargetSearchResult.BonePos = bonePos;
-									TargetSearchResult.DistanceThroughMap = distance;
-								}
-
-							}
-
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
+	if (Settings->GetBool(xc("CountPerformance"))) {
 		auto t2 = high_resolution_clock::now();
-		duration<double, std::milli> ms_double = t2 - t1;
-		if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
-			DebugConsole->PrintMsg(xc("[hkEndScene] execution time of enumeration: ") + std::to_string(ms_double.count()) + xc(" ms"));
-		}
-
-		if (TargetSearchResult.PlayerIndex != -1) {
-			t1 = high_resolution_clock::now();
-			
-			{
-
-				auto dx = static_cast<LONG>(TargetSearchResult.BonePos.x - GI->AimFOV.ScreenCenter.x);
-				auto dy = static_cast<LONG>(TargetSearchResult.BonePos.y - GI->AimFOV.ScreenCenter.y) + 1;
-
-				if (Settings->GetBool(xc("AutoAim")) || (gaks(Settings->GetInt(xc("AimKey"))) & 0x8000)) {
-					aim->Do({ dx, dy });
-				}
-			}
-
-			t2 = high_resolution_clock::now();
-			ms_double = t2 - t1;
-			if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
-				DebugConsole->PrintMsg(xc("execution time of AimbotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
-			}
-
-			t1 = high_resolution_clock::now();
-
-			{
-				FOV f = GI->TriggerBotFOV;
-
-				f.RescaleByDistance(TargetSearchResult.DistanceThroughMap, 3000, 1400, 0.2f);
-
-				if (IsBoneInFOV(TargetSearchResult.BonePos, f)) {
-
-					if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
-						mevt(MOUSEEVENTF_LEFTDOWN, 0, 10, 0, 0);
-						mevt(MOUSEEVENTF_LEFTUP, 0, 10, 0, 0);
-					}
-
-				}
-			}
-
-			t2 = high_resolution_clock::now();
-			ms_double = t2 - t1;
-			if (DebugConsole->IsAttached() && Settings->GetBool(xc("CountPerformance"))) {
-				DebugConsole->PrintMsg(xc("execution time of TriggerBotRoutine: ") + std::to_string(ms_double.count()) + xc(" ms"));
-			}
-		}
-
+		ms_double = t2 - t1;
+		GI->SetDebugLine(xc("hkEndScene GetTarget performance"), xc("time: ") + std::to_string(ms_double.count()) + xc(" ms"));
 	}
+
+	if (AimbotTarget.PlayerIndex != -1) {
+		t1 = high_resolution_clock::now();
+
+		{
+			if (Settings->GetBool(xc("AutoAim")) || (gaks(Settings->GetInt(xc("AimKey"))) & 0x8000)) {
+				aim->Do({ AimbotTarget.BonePos.first.x - GI->ScreenCenter.x, AimbotTarget.BonePos.first.y - GI->ScreenCenter.y + 1 });
+			}
+		}
+
+		if (Settings->GetBool(xc("CountPerformance"))) {
+			auto t2 = high_resolution_clock::now();
+			ms_double = t2 - t1;
+			GI->SetDebugLine(xc("hkEndScene AimbotRoutine performance"), xc(" time: ") + std::to_string(ms_double.count()) + xc(" ms"));
+		}
+
+		t1 = high_resolution_clock::now();
+
+		{
+			GI->TriggerBotFOV.RescaleByDistance(AimbotTarget.DistanceThroughMap, 3000, 1400, 0.2f);
+
+			if ((AimbotTarget.BoneId >= 3 && AimbotTarget.BoneId <= 6) || AimbotTarget.BoneId == 14) {
+				GI->TriggerBotFOV.RescaledDistance *= AimbotTarget.DistanceThroughMap < 1000 ? 8 : 3;
+			}
+
+			if (IsBoneInFOV(AimbotTarget.BonePos.first, GI->TriggerBotFOV)) {
+
+				if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
+					mevt(MOUSEEVENTF_LEFTDOWN, 0, 10, 0, 0);
+					mevt(MOUSEEVENTF_LEFTUP, 0, 10, 0, 0);
+				}
+
+			}
+		}
+
+		if (Settings->GetBool(xc("CountPerformance"))) {
+			auto t2 = high_resolution_clock::now();
+			ms_double = t2 - t1;
+			GI->SetDebugLine(xc("hkEndScene TriggerBotRoutine performance"), xc("time: ") + std::to_string(ms_double.count()) + xc(" ms"));
+		}
+	}
+
+	if (Settings->GetBool(xc("CountPerformance"))) {
+		auto endsceneEnd = high_resolution_clock::now();
+		ms_double = endsceneEnd - endsceneStart;
+		GI->SetDebugLine(xc("hkEndscene performance"), xc("delay: ") + std::to_string(ms_double.count()) + xc(" ms"));
+	}
+
+
 	return oEndScene(pDev);
 }
 
@@ -274,68 +335,63 @@ void setDims(LTVector* dim) {
 	}
 }
 
-signed __int64 __fastcall hkSetObjectDims(void* a1, LTObject* hObj, LTVector* dim, UINT32 flags) {
+signed __int64 __fastcall hkSetObjectDims(void* a1, HOBJECT hObj, LTVector* dim, UINT32 flags) {
+	
 	if (flags == 0) {
 		setDims(dim);
 	}
 	return ((tSetObjectDims)addresses[xc("SetObjectDims")])(a1, hObj, dim, flags);
 }
 
-bool MyFilterObjects(HOBJECT hObj, void* pUser)
-{
-	auto LocalPlayer = PlayersMgr->Local();
-	auto fn = ((tIntersectSegment)addresses[xc("IntersectSegment")]);
-	for (int i = 0; i <= 16; i++)
-	{
-		Player* player = PlayersMgr->GetPlayerByIndex(i);
-
-		if (player != nullptr && player->IsValid() && hObj == player->Object)
-		{
-			return false;
-		}
-
-	}
-	return true;
-}
-
 bool hkIntersectSegment(IntersectQuery* Query, IntersectInfo* Info)
 {
-	auto LocalPlayer = PlayersMgr->Local();
+	auto intersectStart = high_resolution_clock::now();
 	auto fn = ((tIntersectSegment)addresses[xc("IntersectSegment")]);
-	auto localHead = LocalPlayer->GetBoneTransform(6).m_Pos;
-	auto radius = LTVector(0.0f, 20.0f, 0.0f);
-	if (LocalPlayer != nullptr && LocalPlayer->IsValid() && LocalPlayer->IsAlive()) {
-		for (int i = 0; i < 16; i++)
-		{
-			Player* player = PlayersMgr->GetPlayerByIndex(i);
 
-			if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer))
-			{
-				auto headBonePos = player->GetBoneTransform(6).m_Pos;
+	if (Settings->GetBool(xc("SilentAim"))) {
 
-				IntersectQuery pQuery;
-				IntersectInfo pInfo;
+		auto SilentAimTarget = GetTarget(
+			Settings->GetInt(xc("SilentAimBone")), 
+			GI->SilentAimFOV, 
+			(AimSearchType)(Settings->GetInt(xc("SilentAimSearchType"))),
+			xc("hkIntersectSegment")
+		);
 
-				pQuery.m_From = localHead;
-				pQuery.m_To = headBonePos;
-				if (fn(pQuery, &pInfo)) {
-					continue;
-				}
+		if (SilentAimTarget.PlayerIndex != -1) {
+			auto radius = LTVector(0.0f, 50.f, 0.0f);
 
-				Query->m_From = headBonePos + radius;
-				Query->m_To = headBonePos - radius;
-				Query->m_Flags = ::INTERSECT_OBJECTS/* | ::IGNORE_NONSOLID | ::INTERSECT_HPOLY*/;
-				Query->m_FilterFn = MyFilterObjects;
-
-				bool Result = fn(*Query, Info);
-				if (Result)
+			Query->m_From = SilentAimTarget.BonePos.second + radius;
+			Query->m_To = SilentAimTarget.BonePos.second - radius;
+			Query->m_Flags = ::INTERSECT_OBJECTS | ::IGNORE_NONSOLID | ::INTERSECT_HPOLY;
+			Query->m_FilterFn = [](HOBJECT hObj, void* pUser) ->bool {
+				for (int i = 0; i < 16; i++)
 				{
-					Info->m_hObject = player->Object;
-					Info->m_Point = headBonePos;
-					return fn(*Query, Info);
+					Player* player = PlayersMgr->GetPlayerByIndex(i);
+
+					if (player != nullptr && player->IsValid() && hObj == player->Object)
+					{
+						return false;
+					}
+
 				}
+				return true;
+			};
+
+			bool Result = fn(*Query, Info);
+			if (Result)
+			{
+				Info->m_hObject = SilentAimTarget.PlayerObject;
+				Info->m_Point = SilentAimTarget.BonePos.second;
+				return fn(*Query, Info);
 			}
+
 		}
+	}
+
+	if (Settings->GetBool(xc("CountPerformance"))) {
+		auto intersectEnd = high_resolution_clock::now();
+		duration<double, std::milli> ms_double = intersectEnd - intersectStart;
+		GI->SetDebugLine(xc("hkIntersectSegment performance"), xc("delay: ") + std::to_string(ms_double.count()) + xc(" ms"));
 	}
 	return fn(*Query, Info);
 }

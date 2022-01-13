@@ -37,42 +37,43 @@ enum class GradientOrientation
 
 struct FOV
 {
-	POINT ScreenCenter;
-	LONG Distance;
+	LONG InitialDistance;
+	LONG RescaledDistance;
 	FOV() {
-		ScreenCenter = { 0, 0 };
-		Distance = { 0 };
+		InitialDistance = { 0 };
 	}
-	FOV(POINT a, LONG b) {
-		ScreenCenter = a;
-		Distance = b;
+	FOV(LONG a) {
+		InitialDistance = a;
+		RescaledDistance = a;
 	}
 	bool Inited() {
-		return ScreenCenter.x != 0 && ScreenCenter.y != 0;
+		return InitialDistance != 0;
 	}
 	void RescaleByDistance(float actual_distance, float max_delta_distance, float min_delta_distance, float factor) {
+		RescaledDistance = InitialDistance;
 		if (actual_distance > max_delta_distance) {
 			size_t timesLower = round(actual_distance / max_delta_distance);
 			if (timesLower > 0) {
 				auto decrease = factor * timesLower;
-				Distance *= decrease > 1 ? 0 : (1 - decrease);
+				RescaledDistance *= decrease > 1 ? 0 : (1 - decrease);
 			}
 		}
 		if (actual_distance < min_delta_distance) {
-			factor *= 1.2;
 			size_t timesBigger = round(min_delta_distance / actual_distance);
 			if (timesBigger > 0) {
 				auto increase = factor * timesBigger;
-				Distance *= (1 + increase);
+				RescaledDistance *= (1 + increase);
 			}
 		}
 	}
 };
 
-struct AimSearchResult {
+struct TSResult {
 	UINT PlayerIndex;
+	UINT BoneId;
+	HOBJECT PlayerObject;
 	//LTransform BoneTransform;
-	D3DXVECTOR3 BonePos;
+	std::pair<POINT, LTVector> BonePos;
 	UINT FramesCount;
 	UINT FramesCountNeeded;
 	float DistanceThroughMap;

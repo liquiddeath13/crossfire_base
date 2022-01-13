@@ -232,7 +232,6 @@ public:
 	void DrawCircle(int x, int y, float radius, D3DCOLOR color)
 	{
 		if (hideDrawings) return;
-		const DWORD D3D_FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
 		const int NUMPOINTS = 30;
 		const float PI = (float)3.141592654f;
 
@@ -256,7 +255,7 @@ public:
 		pDev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 		pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-		pDev->SetFVF(D3D_FVF);
+		pDev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
 		pDev->SetTexture(0, NULL);
 		pDev->DrawPrimitiveUP(D3DPT_LINESTRIP, NUMPOINTS, &Circle[0], sizeof(Circle[0]));
 		pDev->SetTexture(0, NULL);
@@ -374,12 +373,41 @@ public:
 		pDev->SetStreamSource(0, pBuffer, 0, sizeof(D3DTLVERTEX));
 		pDev->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
 	}
+	void DrawDebug() {
+
+		LONG v = GI->DebugDrawPos.y;
+		for (const auto& str : GI->DebugLines) {
+			DrawTxt(GI->DebugDrawPos.x, v, ("[" + str.first + "]: " + str.second).c_str(), GI->DebugStrColor);
+			v += 15;
+		}
+
+	}
+	void DrawVisibleByList() {
+
+		if (GI->VisibleBy.size() < 1) {
+			return;
+		}
+		LONG yOffset = 0;
+		std::string visibleStr = xc("YOU'RE VISIBLE BY ");
+		LONG xvStrPos = GI->ScreenCenter.x + 15;
+		LONG yvStrPos = GI->ScreenCenter.y - 10;
+		DrawTxt(xvStrPos, yvStrPos, visibleStr.c_str(), Red);
+		for (const auto& nickname : GI->VisibleBy) {
+			if (nickname.length() < 1) {
+				continue;
+			}
+			auto rs = visibleStr + nickname;
+			DrawTxt(xvStrPos + 5, yvStrPos + yOffset, rs.c_str(), Red);
+			yOffset += 15;
+		}
+
+	}
 
 	void DrawBone(Player* player, UINT iStart, UINT iEnd, D3DCOLOR Color)
 	{
 		if (hideDrawings) return;
-		auto StartPos = player->GetBoneTransform(iStart).m_Pos.ToDX();
-		auto EndPos = player->GetBoneTransform(iEnd).m_Pos.ToDX();
+		auto StartPos = player->FastGetBonePos(iStart);
+		auto EndPos = player->FastGetBonePos(iEnd);
 
 		if (WorldToScreen(pDev, &StartPos) && WorldToScreen(pDev, &EndPos)) {
 			if (Settings->GetBool(xc("SkeletonsWithBoneNumbers"))) {
@@ -418,8 +446,8 @@ public:
 		if (hideDrawings) {
 			return;
 		}
-		auto tHead = player->GetBoneTransform(6).m_Pos.ToDX();
-		auto tNeck = player->GetBoneTransform(5).m_Pos.ToDX();
+		auto tHead = player->FastGetBonePos(6);
+		auto tNeck = player->FastGetBonePos(5);
 
 		if (!WorldToScreen(pDev, &tHead) || !WorldToScreen(pDev, &tNeck)) {
 			return;
@@ -523,7 +551,7 @@ public:
 	}
 	void DrawHP(Player* Player) {
 		if (hideDrawings) return;
-		auto head = Player->GetBoneTransform(6).m_Pos.ToDX();
+		auto head = Player->FastGetBonePos(6);
 		if (WorldToScreen(pDev, &head)) {
 			DrawHealthBar(Player, head.x - 15, head.y - 10);
 		}

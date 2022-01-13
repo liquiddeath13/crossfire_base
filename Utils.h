@@ -22,31 +22,6 @@ DWORD64 GetModuleSize(HMODULE hModule)
     return NULL;
 }
 
-bool DataCompare(BYTE* pData, BYTE* bSig, const char* szMask)
-{
-    for (; *szMask; ++szMask, ++pData, ++bSig)
-    {
-        if (*szMask == 'x' && *pData != *bSig) return false;
-    }
-    return (*szMask) == NULL;
-}
-
-BYTE* FindPattern(BYTE* dwAddress, DWORD64 dwSize, PBYTE pbSig, const char* szMask)
-{
-    DWORD64 length = strlen(szMask);
-    for (DWORD64 i = NULL; i < dwSize - length; i++)
-    {
-        if (DataCompare(dwAddress + i, pbSig, szMask)) return dwAddress + i;
-    }
-    return 0;
-}
-
-//DWORD64 findAddress(LPCSTR moduleName, PBYTE Pattern, LPCSTR Mask) {
-//    HMODULE base = gmha(moduleName);
-//    DWORD64 moduleSize = GetModuleSize(base);
-//    return moduleSize > 0 ? (DWORD64)FindPattern((PBYTE)base, (DWORD64)base + moduleSize, Pattern, Mask) : 0;
-//}
-
 std::pair<LPVOID, DWORD64> GetModuleInfo(LPCSTR moduleName) {
 	HMODULE base = gmha(moduleName);
 	return std::make_pair((LPVOID)base, GetModuleSize(base));
@@ -212,13 +187,13 @@ void SetPtrValueMany(PBYTE ptr, DWORD offset, PBYTE src, size_t length) {
 	memcpy_s(ptr + offset + length + 1, 1, "\x00", 1);
 }
 
-size_t GetBoneRadius(D3DXVECTOR3 start, D3DXVECTOR3 end) {
-	D3DXVECTOR3 Box = end - start;
+size_t GetBoneRadius(LTVector start, LTVector end) {
+	LTVector Box = end - start;
 	if (Box.y < 0) Box.y *= -1;
 	return (int)Box.y * 1.5;
 }
 
-bool WorldToScreen(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3* InOut)
+bool WorldToScreen(LPDIRECT3DDEVICE9 pDevice, LTVector* InOut)
 {
 	D3DXVECTOR3 vScreen;
 	D3DVIEWPORT9 viewPort = { 0 };
@@ -267,15 +242,21 @@ float GetDistance(POINT pt1, POINT pt2)
 	return static_cast<float>(sqrt((pt2.y - pt1.y) * (pt2.y - pt1.y) + (pt2.x - pt1.x) * (pt2.x - pt1.x)));
 }
 
-//should do distance based aimbot, not fov
-
 bool IsPointInFOV(POINT pt, FOV f)
 {
-	return pt.x >= f.ScreenCenter.x - f.Distance && pt.x <= f.ScreenCenter.x + f.Distance &&
-		pt.y >= f.ScreenCenter.y - f.Distance && pt.y <= f.ScreenCenter.y + f.Distance;
+	return pt.x >= GI->ScreenCenter.x - f.RescaledDistance && pt.x <= GI->ScreenCenter.x + f.RescaledDistance &&
+		pt.y >= GI->ScreenCenter.y - f.RescaledDistance && pt.y <= GI->ScreenCenter.y + f.RescaledDistance;
 }
 
-bool IsBoneInFOV(D3DXVECTOR3 bonePos, FOV f)
+bool IsBoneInFOV(POINT bonePos2D, FOV f)
 {
-	return IsPointInFOV({ static_cast<LONG>(bonePos.x), static_cast<LONG>(bonePos.y) }, f);
+	return IsPointInFOV(bonePos2D, f);
+}
+
+bool IsModuleOwner(std::string moduleName, DWORD64 address) {
+
+	auto info = GetModuleInfo(moduleName.c_str());
+
+	return address >= (DWORD64)info.first && address <= (DWORD64)info.first + info.second;
+
 }
