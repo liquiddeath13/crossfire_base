@@ -8,9 +8,6 @@ using std::chrono::milliseconds;
 HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
 	//OBS CAN'T CAPTURE THAT IF CHECKED "DON'T CAPTURE EXTERNAL OVERLAYS"
 
-	if (D3D->ShouldHide() || IsModuleOwner(xc("mrac64.dll"), (DWORD64)_ReturnAddress())) {
-		return oPresent(pDev, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-	}
 	auto presentStart = high_resolution_clock::now();
 	D3D->SetDevice(pDev);
 	//D3D->DrawTxt(20, 20, std::string(xc("present hook called ") + std::to_string(++presentHookCalledTimes) + xc(" times")).c_str(), Gold);
@@ -24,43 +21,41 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 	
 	if (Settings->GetBool(xc("DrawDebug"))) {
 		D3D->DrawDebug();
-	}
-	
-	auto LocalPlayer = PlayersMgr->Local();
 
-	if (LocalPlayer != nullptr && LocalPlayer->IsValid() && LocalPlayer->IsAlive()) {
-		
-
-		if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
-
-			GI->ClearVisibleByList();
-
+		if (Settings->GetBool(xc("DrawRadius"))) {
+			if (Settings->GetBool(xc("Aimbot"))) {
+				D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->AimbotFOV.InitialDistance, Blue);
+			}
+			if (Settings->GetBool(xc("TriggerBot"))) {
+				D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->TriggerBotFOV.RescaledDistance, Green);
+			}
+			if (Settings->GetBool(xc("SilentAim"))) {
+				D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->SilentAimFOV.InitialDistance, White);
+			}
 		}
+	}
+	if (Settings->GetBool(xc("ESP"))) {
+		auto LocalPlayer = PlayersMgr->Local();
 
-		for (size_t i = 0; i < 16; i++)
-		{
-			auto player = PlayersMgr->GetPlayerByIndex(i);
+		if (LocalPlayer != nullptr && LocalPlayer->IsValid() && LocalPlayer->IsAlive()) {
 
-			if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer)) {
-				
-				bool visible = player->FastIsVisibleBy(LocalPlayer, 6);
-				
-				if (Settings->GetBool(xc("ESP"))) {
+
+			if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
+
+				GI->ClearVisibleByList();
+
+			}
+
+			for (size_t i = 0; i < 16; i++)
+			{
+				auto player = PlayersMgr->GetPlayerByIndex(i);
+
+				if (player != nullptr && player->IsValid() && player->IsAlive() && player->IsOpponentTo(LocalPlayer)) {
+
+					bool visible = player->FastIsVisibleBy(LocalPlayer, 6);
 
 					auto espColor = visible ? Green : Red;
 					auto center = GetScreenCenter(D3D->GetDevice());
-
-					if (Settings->GetBool(xc("DrawRadius"))) {
-						if (Settings->GetBool(xc("Aimbot"))) {
-							D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->AimbotFOV.InitialDistance, Blue);
-						}
-						if (Settings->GetBool(xc("TriggerBot"))) {
-							D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->TriggerBotFOV.RescaledDistance, Green);
-						}
-						if (Settings->GetBool(xc("SilentAim"))) {
-							D3D->DrawCircle(GI->ScreenCenter.x, GI->ScreenCenter.y, GI->SilentAimFOV.InitialDistance, White);
-						}
-					}
 
 					if (Settings->GetBool(xc("Skeletons"))) {
 
@@ -91,14 +86,13 @@ HRESULT __stdcall hkPresent(IDirect3DDevice9* pDev, CONST RECT* pSourceRect, CON
 
 			}
 
+			if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
+
+				D3D->DrawVisibleByList();
+
+			}
+
 		}
-
-		if (Settings->GetBool(xc("YouAreVisibleAlarm"))) {
-
-			D3D->DrawVisibleByList();
-
-		}
-		
 	}
 
 	if (Settings->GetBool(xc("CountPerformance"))) {
@@ -206,9 +200,6 @@ TSResult GetTarget(UINT preferableBone, FOV f, AimSearchType SearchType, std::st
 }
 
 HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
-	if (D3D->ShouldHide() || IsModuleOwner(xc("mrac64.dll"), (DWORD64)_ReturnAddress())) {
-		return oEndScene(pDev);
-	}
 	auto endsceneStart = high_resolution_clock::now();
 	duration<double, std::milli> ms_double;
 	D3D->SetDevice(pDev);
@@ -217,67 +208,87 @@ HRESULT __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDev) {
 	if (gaks(Settings->GetInt(xc("AimKeyONOFF"))) & 1) {
 		Settings->SetBool(xc("Aimbot"), !Settings->GetBool(xc("Aimbot")));
 	}
-	if (gaks(Settings->GetInt(xc("TriggerKeyONOFF"))) & 1) {
+	/*if (gaks(Settings->GetInt(xc("TriggerKeyONOFF"))) & 1) {
 		Settings->SetBool(xc("TriggerBot"), !Settings->GetBool(xc("TriggerBot")));
 	}
+	if (gaks(Settings->GetInt(xc("SilentAimONOFF"))) & 1) {
+		Settings->SetBool(xc("SilentAim"), !Settings->GetBool(xc("SilentAim")));
+	}
+	if (gaks(VK_F5) & 1) {
+		Settings->SetBool(xc("DrawDebug"), !Settings->GetBool(xc("DrawDebug")));
+		Settings->SetBool(xc("DrawRadius"), !Settings->GetBool(xc("DrawRadius")));
+	}*/
 
 	++endsceneHookCalledTimes;
-
-	auto t1 = high_resolution_clock::now();
-	
-	auto AimbotTarget = GetTarget(
-		Settings->GetInt(xc("AimbotBone")), 
-		GI->AimbotFOV, 
-		(AimSearchType)(Settings->GetInt(xc("AimbotSearchType"))), 
-		xc("hkEndScene")
-	);
-
-	if (Settings->GetBool(xc("CountPerformance"))) {
-		auto t2 = high_resolution_clock::now();
-		ms_double = t2 - t1;
-		GI->SetDebugLine(xc("hkEndScene GetTarget performance"), xc("time: ") + std::to_string(ms_double.count()) + xc(" ms"));
-	}
-
-	if (AimbotTarget.PlayerIndex != -1) {
-		t1 = high_resolution_clock::now();
-
-		{
-			if (Settings->GetBool(xc("AutoAim")) || (gaks(Settings->GetInt(xc("AimKey"))) & 0x8000)) {
-				aim->Do({ AimbotTarget.BonePos.first.x - GI->ScreenCenter.x, AimbotTarget.BonePos.first.y - GI->ScreenCenter.y + 1 });
-			}
-		}
+	auto Local = PlayersMgr->Local();
+	if (Settings->GetBool(xc("Aimbot")) && Local != nullptr && Local->IsValid() && Local->IsAlive()) {
+		auto t1 = high_resolution_clock::now();
+		auto AimbotTarget = GetTarget(
+			Settings->GetInt(xc("AimbotBone")),
+			GI->AimbotFOV,
+			(AimSearchType)(Settings->GetInt(xc("AimbotSearchType"))),
+			xc("hkEndScene")
+		);
 
 		if (Settings->GetBool(xc("CountPerformance"))) {
 			auto t2 = high_resolution_clock::now();
 			ms_double = t2 - t1;
-			GI->SetDebugLine(xc("hkEndScene AimbotRoutine performance"), xc(" time: ") + std::to_string(ms_double.count()) + xc(" ms"));
+			GI->SetDebugLine(xc("hkEndScene GetTarget performance"), xc("time: ") + std::to_string(ms_double.count()) + xc(" ms"));
 		}
 
-		t1 = high_resolution_clock::now();
+		if (AimbotTarget.PlayerIndex != -1) {
 
-		{
-			GI->TriggerBotFOV.RescaleByDistance(AimbotTarget.DistanceThroughMap, 3000, 1400, 0.2f);
+			t1 = high_resolution_clock::now();
 
-			if ((AimbotTarget.BoneId >= 3 && AimbotTarget.BoneId <= 6) || AimbotTarget.BoneId == 14) {
-				GI->TriggerBotFOV.RescaledDistance *= AimbotTarget.DistanceThroughMap < 1000 ? 8 : 3;
-			}
+			{
+				if (Settings->GetBool(xc("TriggerBot")) && !gaks(VK_LBUTTON)) {
 
-			if (IsBoneInFOV(AimbotTarget.BonePos.first, GI->TriggerBotFOV)) {
+					if (endsceneHookCalledTimes % 7 > 2) {
+						GI->TriggerBotFOV.RescaleByDistance(AimbotTarget.DistanceThroughMap, 3000, 1400, 0.2f);
 
-				if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
-					mevt(MOUSEEVENTF_LEFTDOWN, 0, 10, 0, 0);
-					mevt(MOUSEEVENTF_LEFTUP, 0, 10, 0, 0);
+						if ((AimbotTarget.BoneId >= 3 && AimbotTarget.BoneId <= 6) || AimbotTarget.BoneId == 14) {
+							GI->TriggerBotFOV.RescaledDistance *= AimbotTarget.DistanceThroughMap < 700 ? 10 : 1.5f;
+						}
+
+						if (IsBoneInFOV(AimbotTarget.BonePos.first, GI->TriggerBotFOV)) {
+
+							if (Settings->GetBool(xc("AutoTrigger")) || (gaks(Settings->GetInt(xc("TriggerKey"))) & 0x8000)) {
+								mevt(MOUSEEVENTF_LEFTDOWN, 0, 10, 0, 0);
+								mevt(MOUSEEVENTF_LEFTUP, 0, 10, 0, 0);
+							}
+
+						}
+					}
+
 				}
 
 			}
-		}
 
-		if (Settings->GetBool(xc("CountPerformance"))) {
-			auto t2 = high_resolution_clock::now();
-			ms_double = t2 - t1;
-			GI->SetDebugLine(xc("hkEndScene TriggerBotRoutine performance"), xc("time: ") + std::to_string(ms_double.count()) + xc(" ms"));
+			if (Settings->GetBool(xc("CountPerformance"))) {
+				auto t2 = high_resolution_clock::now();
+				ms_double = t2 - t1;
+				GI->SetDebugLine(xc("hkEndScene TriggerBotRoutine performance"), xc("time: ") + std::to_string(ms_double.count()) + xc(" ms"));
+			}
+
+			t1 = high_resolution_clock::now();
+
+			{
+				if (!gaks(VK_LBUTTON)) {
+					if (Settings->GetBool(xc("AutoAim")) || (gaks(Settings->GetInt(xc("AimKey"))) & 0x8000)) {
+						aim->Do({ AimbotTarget.BonePos.first.x - GI->ScreenCenter.x, AimbotTarget.BonePos.first.y - GI->ScreenCenter.y - 1 });
+					}
+				}
+
+			}
+
+			if (Settings->GetBool(xc("CountPerformance"))) {
+				auto t2 = high_resolution_clock::now();
+				ms_double = t2 - t1;
+				GI->SetDebugLine(xc("hkEndScene AimbotRoutine performance"), xc(" time: ") + std::to_string(ms_double.count()) + xc(" ms"));
+			}
 		}
 	}
+	
 
 	if (Settings->GetBool(xc("CountPerformance"))) {
 		auto endsceneEnd = high_resolution_clock::now();
@@ -295,20 +306,6 @@ bool InitDXHooks() {
 
 bool DeinitDXHooks() {
 	return D3D->HookPresent(NULL, false) && D3D->HookReset(NULL, false) && D3D->HookEndScene(NULL, false);
-}
-
-LTRESULT hkSendToServer(void* pCLTClient, ILTMessage_Read* pMsg, uint32 flags)
-{
-	if (pMsg) {
-		auto msgId = pMsg->Peekuint8();
-		pMsg->SeekTo(0);
-
-		if (DebugConsole->IsAttached()) {
-			DebugConsole->PrintMsg(xc("Got message id ") + std::to_string(msgId) + xc(" from hkSendToServer"));
-		}
-	}
-
-	return ((tSend2Server)(addresses[xc("SendToServer")]))(pCLTClient, pMsg, flags);
 }
 
 float hb_multiplier[] = { 2.5f, 2.5f, 2.5f, 2.5f };
@@ -347,7 +344,6 @@ bool hkIntersectSegment(IntersectQuery* Query, IntersectInfo* Info)
 {
 	auto intersectStart = high_resolution_clock::now();
 	auto fn = ((tIntersectSegment)addresses[xc("IntersectSegment")]);
-
 	if (Settings->GetBool(xc("SilentAim"))) {
 
 		auto SilentAimTarget = GetTarget(
@@ -358,7 +354,7 @@ bool hkIntersectSegment(IntersectQuery* Query, IntersectInfo* Info)
 		);
 
 		if (SilentAimTarget.PlayerIndex != -1) {
-			auto radius = LTVector(0.0f, 50.f, 0.0f);
+			auto radius = LTVector(0.0f, 30.f, 0.0f);
 
 			Query->m_From = SilentAimTarget.BonePos.second + radius;
 			Query->m_To = SilentAimTarget.BonePos.second - radius;
